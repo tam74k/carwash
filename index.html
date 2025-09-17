@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>كار ووش – حجوزات الغسيل المتنقل</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind (بيئة تجريبية) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Cairo font -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <!-- Swiper -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+  <!-- MapLibre GL -->
+  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+
+  <style id="theme-core">
+    :root{
+      --brand:#5568FE; --brand-2:#8B9BFF; --accent:#FFCF6B;
+      --ink:#0e1330; --surface:#ffffff; --muted:#7b8090;
+      --radius-xl:28px; --bottom-nav-h:72px;
+    }
+    body{
+      font-family:'Cairo',sans-serif;
+      background:
+        radial-gradient(1200px 600px at 90% -10%, #ffe7cc 0%, transparent 55%),
+        radial-gradient(900px 600px at -10% 0%, #e9e6ff 0%, transparent 50%),
+        linear-gradient(180deg,#f6f8ff 0%, #fdfaf7 100%);
+      color:var(--ink); min-height:100vh; position:relative;
+    }
+    .bg-orbs:before,.bg-orbs:after{ content:""; position:fixed; z-index:-1; filter:blur(40px); opacity:.65; pointer-events:none; transform:translateZ(0) }
+    .bg-orbs:before{ top:-180px; right:-120px; width:520px; height:520px; border-radius:50%;
+      background:radial-gradient(closest-side, rgba(85,104,254,.35), transparent 70%) }
+    .bg-orbs:after{ bottom:-220px; left:-160px; width:640px; height:640px; border-radius:50%;
+      background:radial-gradient(closest-side, rgba(255,207,107,.35), transparent 70%) }
+    .container-narrow{ max-width:1120px; margin:0 auto }
+    .glass{ background:var(--surface); border-radius:var(--radius-xl); box-shadow:0 12px 28px rgba(85,104,254,.08), 0 2px 8px rgba(14,19,48,.06) }
+    .btn-primary{ background-image:linear-gradient(90deg,var(--brand),var(--brand-2)); color:#fff; font-weight:700; border-radius:16px; box-shadow:0 8px 18px rgba(85,104,254,.25) }
+    .btn-ghost{ background:#fff; border:1px solid #e6e8ef; border-radius:12px; padding:8px 10px }
+    .slot-btn{ border:0; background:#fff; border-radius:16px; padding:12px 14px; font-weight:700; box-shadow:0 10px 22px rgba(85,104,254,.08) }
+    .slot-btn.selected{ background:#e9e6ff; color:#4036e6 }
+    input,select,textarea{ background:#fff; border-radius:16px!important; border:2px solid #eef0f7!important }
+    input:focus,select:focus,textarea:focus{ outline:none; box-shadow:0 0 0 4px rgba(85,104,254,.12); border-color:var(--brand)!important }
+    .modal{ display:none } .modal.show{ display:flex }
+    .bn-active{ color:#4036e6!important; font-weight:700 }
+    .pb-safe{ padding-bottom: calc(var(--bottom-nav-h) + 64px) }
+
+    .stats-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px }
+    .stat-tile{ background:#fff; border-radius:22px; height:96px; padding:10px 12px; text-align:center;
+      box-shadow:0 10px 24px rgba(85,104,254,.08); cursor:pointer; transition:transform .15s ease, box-shadow .15s ease;
+      display:flex; flex-direction:column; align-items:flex-end; justify-content:center }
+    .stat-tile:hover{ transform:translateY(-2px); box-shadow:0 14px 28px rgba(85,104,254,.12) }
+    .stat-title{ font-size:.9rem; color:#6b7280 }
+    .stat-num{ font-weight:800; font-size:1.25rem; line-height:1 }
+    .stat-active{ outline:3px solid rgba(85,104,254,.22) }
+    @media (min-width:768px){ .stat-tile{ height:120px; padding:14px } .stat-title{ font-size:1rem } .stat-num{ font-size:1.5rem } }
+
+    .star{ font-size:28px; cursor:pointer; color:#d1d5db } .star.active{ color:#f59e0b }
+    #addrMap{ height:260px; border-radius:16px; overflow:hidden }
+
+    .seg{ display:inline-flex; background:#fff; border:1px solid #e6e8ef; border-radius:14px; padding:4px }
+    .seg button{ padding:8px 12px; border-radius:10px; }
+    .seg .active{ background:#eef0ff; color:#4036e6; font-weight:700 }
+
+    /* زر الشير العائم */
+    .fab-share{
+      position:fixed; right:16px; bottom:calc(var(--bottom-nav-h) + 16px);
+      z-index:50; display:flex; align-items:center; gap:10px;
+      background-image:linear-gradient(90deg,var(--brand),var(--brand-2));
+      color:#fff; border:none; border-radius:999px; padding:12px 16px;
+      box-shadow:0 10px 24px rgba(85,104,254,.28); cursor:pointer;
+    }
+    .fab-share .txt{ display:none }
+    @media (min-width:480px){ .fab-share .txt{ display:inline } }
+
+    /* زر الحجز الدائري في منتصف البار */
+    .bn-fab{
+      position:fixed; left:50%;
+      bottom:calc(var(--bottom-nav-h) + 10px);
+      transform:translateX(-50%);
+      width:74px; height:74px; border-radius:50%;
+      background-image:linear-gradient(90deg,var(--brand),var(--brand-2));
+      color:#fff; display:grid; place-items:center; font-size:26px;
+      box-shadow:0 14px 32px rgba(85,104,254,.35);
+      z-index:60; border:4px solid #fff; cursor:pointer;
+    }
+  </style>
+</head>
+<body class="bg-orbs">
+  <div id="notifications" class="fixed top-4 left-4 z-50 space-y-3"></div>
+
+  <!-- ================= AUTH ================= -->
+  <section id="authScreen" class="min-h-screen grid place-items-center p-6 pb-safe">
+    <div class="w-full max-w-3xl rounded-3xl overflow-hidden shadow-2xl glass">
+      <div class="grid md:grid-cols-2">
+        <div class="p-10 grid place-items-center bg-gradient-to-br from-[#efeaff] to-[#fff7eb]">
+          <div class="text-center">
+            <img id="brandLogo" class="w-36 h-36 object-contain bg-white rounded-2xl border shadow" alt="الشعار">
+            <div id="brandName" class="mt-4 text-2xl md:text-3xl font-extrabold text-slate-900">كار ووش</div>
+          </div>
+        </div>
+        <div class="p-8 bg-white">
+          <h2 class="text-xl font-bold text-slate-900 mb-6">أهلاً بيك</h2>
+
+          <div id="loginForm" class="space-y-4">
+            <label class="block"><span class="text-sm text-gray-700">البريد الإلكتروني</span>
+              <input id="email" type="email" class="mt-1 w-full py-3 px-3" placeholder="you@example.com">
+            </label>
+            <label class="block"><span class="text-sm text-gray-700">كلمة المرور</span>
+              <input id="password" type="password" class="mt-1 w-full py-3 px-3" placeholder="••••••••">
+            </label>
+            <button id="loginBtn" class="w-full btn-primary py-3">دخول</button>
+
+            <div class="text-center mt-4 text-sm text-gray-600">
+              ما عندكش حساب؟
+              <button class="text-[var(--brand)] font-bold" onclick="toggleAuth('signup')">إنشاء حساب جديد</button>
+            </div>
+          </div>
+
+          <div id="signupForm" class="space-y-4 hidden">
+            <div class="grid sm:grid-cols-2 gap-3">
+              <label class="block"><span class="text-sm text-gray-700">الاسم الكامل</span>
+                <input id="signupFullName" type="text" class="mt-1 w-full py-3 px-3" placeholder="محمد أحمد">
+              </label>
+              <label class="block"><span class="text-sm text-gray-700">الموبايل</span>
+                <input id="signupPhone" type="tel" class="mt-1 w-full py-3 px-3" placeholder="01xxxxxxxxx">
+              </label>
+            </div>
+            <label class="block"><span class="text-sm text-gray-700">البريد الإلكتروني</span>
+              <input id="signupEmail" type="email" class="mt-1 w-full py-3 px-3" placeholder="you@example.com">
+            </label>
+            <div class="grid sm:grid-cols-2 gap-3">
+              <label class="block"><span class="text-sm text-gray-700">كلمة المرور</span>
+                <input id="signupPassword" type="password" class="mt-1 w-full py-3 px-3" placeholder="••••••••">
+              </label>
+              <label class="block"><span class="text-sm text-gray-700">تأكيد كلمة المرور</span>
+                <input id="signupPasswordConfirm" type="password" class="mt-1 w-full py-3 px-3" placeholder="••••••••">
+              </label>
+            </div>
+
+            <div class="flex gap-3">
+              <button id="signupBtn" class="flex-1 btn-primary py-3">إنشاء الحساب</button>
+              <button type="button" class="px-4 py-3 rounded-xl border" onclick="toggleAuth('login')">رجوع</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= APP ================= -->
+  <section id="mainApp" class="hidden pb-safe">
+    <header class="bg-transparent backdrop-blur sticky top-0 z-30">
+      <div class="container-narrow px-4 py-3 grid grid-cols-[auto_1fr_auto] items-center gap-3">
+        <div class="flex items-center gap-3 justify-self-center">
+          <img id="brandLogoSmall" class="w-10 h-10 rounded-xl object-cover border" alt="logo">
+          <div>
+            <h2 id="brandNameSmall" class="text-lg font-extrabold text-slate-900">كار ووش</h2>
+            <p class="text-xs text-gray-500">مرحبًا، <span id="userName">ضيف</span></p>
+          </div>
+        </div>
+        <div class="justify-self-end">
+          <button id="logoutBtn" type="button" onclick="signOut()" class="px-3 py-1.5 rounded-lg border text-sm cursor-pointer">خروج</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container-narrow px-4 py-6 space-y-8 pb-28">
+      <!-- بانرز -->
+      <div id="bannersArea" class="glass overflow-hidden">
+        <div class="swiper" dir="rtl">
+          <div class="swiper-wrapper" id="bannersSwiperWrapper"></div>
+          <div class="swiper-pagination"></div>
+          <div class="swiper-button-prev"></div>
+          <div class="swiper-button-next"></div>
+        </div>
+      </div>
+
+      <div id="onboardingHint" class="hidden p-4 rounded-2xl bg-yellow-50 border border-yellow-200 text-yellow-800">
+        محتاج تكمل بيانات حسابك (موبايل/عنوان/سيارة) علشان تحجز بسهولة.
+        <button class="btn-ghost ml-2" onclick="showTab('profile')">اذهب لصفحة حسابي</button>
+      </div>
+
+      <!-- الرئيسية -->
+      <div id="homeTab" class="tab-content">
+        <div class="stats-grid">
+          <button class="stat-tile stat-active" onclick="openBookingsWithFilter('open')" title="الحجوزات المفتوحة">
+            <div class="stat-title">حجوزات مفتوحة</div>
+            <div id="openBookingsCount" class="stat-num text-[var(--brand)]">0</div>
+          </button>
+          <button class="stat-tile" onclick="openBookingsWithFilter('completed')" title="الحجوزات المكتملة">
+            <div class="stat-title">مكتملة</div>
+            <div id="completedBookingsCount" class="stat-num text-green-600">0</div>
+          </button>
+          <button class="stat-tile" onclick="openBookingsWithFilter('cancelled')" title="الحجوزات الملغاة">
+            <div class="stat-title">ملغاة</div>
+            <div id="cancelledBookingsCount" class="stat-num text-red-600">0</div>
+          </button>
+        </div>
+
+        <div class="mt-6">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-lg mb-3">فريق العمل</h3>
+          </div>
+          <div id="teamGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
+        </div>
+
+        <div class="mt-6">
+          <button class="px-5 py-3 btn-primary" onclick="showBookingWizard()">+ حجز جديد</button>
+        </div>
+      </div>
+
+      <!-- حجوزاتي -->
+      <div id="bookingsTab" class="tab-content hidden">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-lg">حجوزاتي</h3>
+          <div class="seg" id="bookingsFilters">
+            <button id="filterOpen" class="active" onclick="setBookingsFilter('open')"><i class="fa-regular fa-clock ml-1"></i> مفتوحة</button>
+            <button id="filterCompleted" onclick="setBookingsFilter('completed')"><i class="fa-solid fa-check ml-1"></i> مكتملة</button>
+            <button id="filterCancelled" onclick="setBookingsFilter('cancelled')"><i class="fa-solid fa-xmark ml-1"></i> ملغاة</button>
+          </div>
+        </div>
+        <div id="bookingsList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+
+      <!-- الحجز: معالج كامل -->
+      <div id="bookingTab" class="tab-content hidden">
+        <!-- الخطوة 1 -->
+        <div id="step1" class="booking-step">
+          <h3 class="text-xl font-bold mb-4">1) اختر الخدمات (حتى 3)</h3>
+          <div id="servicesGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+          <div id="selectedServices" class="hidden mt-4 p-4 glass">
+            <div class="flex justify-between items-center mb-2">
+              <h4 class="font-semibold">الخدمات المختارة</h4>
+              <div class="text-sm text-gray-600">
+                الإجمالي: <span id="totalPrice" class="text-[var(--brand)] font-bold">0 ج.م</span>
+                • المدة: <span id="totalDuration" class="text-[var(--brand)] font-bold">0 دقيقة</span>
+              </div>
+            </div>
+            <div id="servicesList" class="space-y-2"></div>
+          </div>
+          <div class="mt-6 mb-20 text-left">
+            <button id="step1Next" class="px-4 py-2 btn-primary disabled:opacity-40" disabled onclick="nextStep(2)">
+              التالي <i class="fa-solid fa-arrow-left mr-2"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- الخطوة 2 -->
+        <div id="step2" class="booking-step hidden">
+          <h3 class="text-xl font-bold mb-2">2) التاريخ والوقت</h3>
+          <p class="text-sm text-gray-600 mb-4">المواعيد تُحسب حسب <span class="font-semibold">العنوان الافتراضي</span> الخاص بك.</p>
+          <div class="grid sm:grid-cols-[260px_1fr] gap-4 items-start">
+            <label class="block">
+              <span class="text-sm text-gray-700">التاريخ</span>
+              <input id="bookingDate" type="date" class="mt-1 w-full py-2 px-3" />
+              <p id="offDayNote" class="hidden mt-2 text-sm text-red-600">لا توجد مواعيد متاحة — اليوم إجازة.</p>
+              <div id="needAddressWrap" class="hidden mt-2 flex items-center gap-2">
+                <p id="needAddressNote" class="text-sm text-orange-600">من فضلك أضف عنوانًا افتراضيًا أولاً.</p>
+                <button type="button" class="px-3 py-1.5 rounded-lg border text-sm" onclick="showTab('profile')">إدارة العناوين</button>
+              </div>
+              <div id="vehicleHint" class="mt-2 text-xs text-gray-600"></div>
+            </label>
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <div class="text-sm text-gray-600">المواعيد (كل ساعتين 9 ص → 2 ص)</div>
+                <button class="text-sm text-[var(--brand)]" onclick="reloadSlots()">تحديث</button>
+              </div>
+              <div id="slotsGrid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2"></div>
+            </div>
+          </div>
+          <div class="mt-6 mb-20 flex justify-between">
+            <button class="px-4 py-2 rounded-lg border" onclick="prevStep(1)"><i class="fa-solid fa-arrow-right ml-2"></i> رجوع</button>
+            <button id="step2Next" class="px-4 py-2 btn-primary disabled:opacity-40" disabled onclick="nextStep(3)">
+              التالي <i class="fa-solid fa-arrow-left mr-2"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- الخطوة 3 -->
+        <div id="step3" class="booking-step hidden">
+          <h3 class="text-xl font-bold mb-3">3) العنوان والسيارة</h3>
+
+          <div class="glass p-4 mb-4">
+            <div class="grid sm:grid-cols-[2fr_auto] gap-3 items-end">
+              <label class="block">
+                <span class="text-sm text-gray-700">عنواني</span>
+                <select id="userAddressSelect" class="mt-1 w-full py-3 px-3"></select>
+              </label>
+              <button type="button" class="rounded-xl border px-4 py-3" onclick="openAddAddress()">+ إضافة/إدارة العناوين</button>
+            </div>
+            <div class="text-xs text-gray-600 mt-2" id="vehicleHintStep3"></div>
+          </div>
+
+          <div class="glass p-4">
+            <div class="grid sm:grid-cols-2 gap-3">
+              <label class="block">
+                <span class="text-sm text-gray-700">رقم الموبايل (من الحساب)</span>
+                <input id="phoneSnapshot" type="tel" class="mt-1 w-full py-3 px-3 bg-gray-50" readonly placeholder="سيتم تعبئته من الحساب">
+              </label>
+              <div class="grid sm:grid-cols-[2fr_auto] gap-3 items-end">
+                <label class="block">
+                  <span class="text-sm text-gray-700">سيارتي</span>
+                  <select id="userCarSelect" class="mt-1 w-full py-3 px-3"></select>
+                </label>
+                <button type="button" class="rounded-xl border px-4 py-3" onclick="openAddCar()">+ إضافة سيارة</button>
+              </div>
+            </div>
+
+            <div id="addCarBox" class="hidden mt-3 border rounded-xl p-3 bg-white">
+              <h4 class="font-semibold mb-2">إضافة سيارة جديدة</h4>
+              <div class="grid sm:grid-cols-3 gap-3">
+                <input id="carMakeModel" class="py-3 px-3 rounded-xl border-gray-300" placeholder="نوع/ماركة">
+                <input id="carColor" class="py-3 px-3 rounded-xl border-gray-300" placeholder="اللون">
+                <input id="carPlate" class="py-3 px-3 rounded-xl border-gray-300" placeholder="رقم اللوحة">
+              </div>
+              <div class="mt-3 flex gap-2">
+                <button class="px-3 py-2 btn-primary" onclick="saveNewCar()">حفظ</button>
+                <button class="px-3 py-2 rounded-xl bg-gray-100" onclick="closeAddCar()">إلغاء</button>
+              </div>
+            </div>
+
+            <label class="block mt-3">
+              <span class="text-sm text-gray-700">ملاحظات</span>
+              <textarea id="notes" rows="3" class="mt-1 w-full py-3 px-3" placeholder="تعليمات الوصول ..."></textarea>
+            </label>
+          </div>
+
+          <div class="mt-6 mb-20 flex justify-between">
+            <button class="px-4 py-2 rounded-lg border" onclick="prevStep(2)"><i class="fa-solid fa-arrow-right ml-2"></i> رجوع</button>
+            <button id="confirmBtn" class="px-4 py-2 btn-primary disabled:opacity-40" disabled onclick="confirmBooking()">
+              تأكيد الحجز <i class="fa-solid fa-check mr-2"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- حسابي -->
+      <div id="profileTab" class="tab-content hidden">
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="p-4 glass">
+            <h3 class="font-bold text-lg mb-3">بيانات الحساب</h3>
+            <div class="grid gap-3">
+              <label class="block">
+                <span class="text-sm text-gray-700">الاسم</span>
+                <input id="accountName" class="mt-1 w-full py-3 px-3 bg-gray-50" readonly>
+              </label>
+              <label class="block">
+                <span class="text-sm text-gray-700">البريد</span>
+                <input id="accountEmail" class="mt-1 w-full py-3 px-3 bg-gray-50" readonly>
+              </label>
+              <label class="block">
+                <span class="text-sm text-gray-700">الموبايل</span>
+                <input id="accountPhone" class="mt-1 w-full py-3 px-3">
+              </label>
+              <div class="text-left">
+                <button id="saveAccountBtn" class="px-4 py-2 btn-primary" onclick="saveAccount()">حفظ</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 glass">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-lg">عناويني</h3>
+              <button class="btn-ghost" onclick="openAddAddress()">+ إضافة عنوان</button>
+            </div>
+            <div id="addressesList" class="mt-3 space-y-2"></div>
+          </div>
+
+          <div class="p-4 glass md:col-span-2">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-lg">سياراتي</h3>
+              <button class="btn-ghost" onclick="openAddCar()">+ إضافة سيارة</button>
+            </div>
+            <div id="profileCarsList" class="mt-3 space-y-2"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur z-40" style="height: var(--bottom-nav-h);">
+      <div class="max-w-[1120px] mx-auto px-4 h-full">
+        <div class="grid grid-cols-4 h-full">
+          <button class="py-3 text-center text-gray-600 bn-active" data-tab="home" onclick="showTab('home')"><i class="fa-solid fa-house text-lg"></i><div class="text-xs">الرئيسية</div></button>
+          <button class="py-3 text-center text-gray-600" data-tab="bookings" onclick="showTab('bookings'); setBookingsFilter('open');"><i class="fa-regular fa-calendar-check text-lg"></i><div class="text-xs">حجوزاتي</div></button>
+          <div></div>
+          <button class="py-3 text-center text-gray-600" data-tab="profile" onclick="showTab('profile')"><i class="fa-solid fa-user text-lg"></i><div class="text-xs">حسابي</div></button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- زر الحجز الدائري -->
+    <button class="bn-fab" onclick="showBookingWizard()" title="حجز جديد">
+      <i class="fa-solid fa-plus"></i>
+    </button>
+
+    <!-- زر الشير العائم -->
+    <button class="fab-share" onclick="shareApp()" title="مشاركة التطبيق">
+      <i class="fa-solid fa-share-nodes text-lg"></i>
+      <span class="txt font-bold">مشاركة</span>
+    </button>
+  </section>
+
+  <!-- إيصال -->
+  <div id="receiptModal" class="modal fixed inset-0 z-40 items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50" onclick="closeModal('receiptModal')"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+      <div class="absolute top-3 left-3">
+        <button class="text-gray-500 hover:text-gray-700" onclick="closeModal('receiptModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="receiptContent"></div>
+    </div>
+  </div>
+
+  <!-- تعديل حجز -->
+  <div id="editBookingModal" class="modal fixed inset-0 z-40 items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50" onclick="closeModal('editBookingModal')"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">تعديل الحجز</h3>
+        <button class="text-gray-500" onclick="closeModal('editBookingModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3">
+        <label class="block">
+          <span class="text-sm text-gray-700">العنوان</span>
+          <select id="editAddressSelect" class="mt-1 w-full py-2 px-3"></select>
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-700">التاريخ</span>
+          <input id="editDate" type="date" class="mt-1 w-full py-2 px-3">
+        </label>
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm text-gray-700">اختيار الوقت</span>
+            <button class="text-sm text-[var(--brand)]" onclick="renderEditSlots()">تحديث</button>
+          </div>
+          <div id="editSlotsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+        </div>
+        <div class="text-xs text-gray-600" id="editVehicleHint"></div>
+        <div class="text-left">
+          <button class="px-4 py-2 rounded-lg border" onclick="closeModal('editBookingModal')">إلغاء</button>
+          <button id="saveEditBtn" class="px-4 py-2 btn-primary ml-2 disabled:opacity-40" disabled onclick="saveEditBooking()">حفظ التعديلات</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- تقييم -->
+  <div id="ratingModal" class="modal fixed inset-0 z-40 items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50" onclick="closeModal('ratingModal')"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">قيّم الخدمة</h3>
+        <button class="text-gray-500" onclick="closeModal('ratingModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="text-center">
+        <div id="stars" class="flex items-center justify-center gap-2 my-2">
+          <i class="fa-solid fa-star star" data-v="1"></i>
+          <i class="fa-solid fa-star star" data-v="2"></i>
+          <i class="fa-solid fa-star star" data-v="3"></i>
+          <i class="fa-solid fa-star star" data-v="4"></i>
+          <i class="fa-solid fa-star star" data-v="5"></i>
+        </div>
+        <textarea id="ratingComment" rows="3" class="w-full py-3 px-3 rounded-xl border mt-2" placeholder="اكتب رأيك باختصار (اختياري)"></textarea>
+        <div class="mt-3">
+          <button class="px-4 py-2 rounded-lg border" onclick="closeModal('ratingModal')">إلغاء</button>
+          <button id="submitRatingBtn" class="px-4 py-2 btn-primary ml-2 disabled:opacity-40" disabled onclick="submitRating()">إرسال التقييم</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- إضافة/تعديل عنوان -->
+  <div id="addressModal" class="modal fixed inset-0 z-40 items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50" onclick="closeModal('addressModal')"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-xl p-6">
+      <div class="flex items-center justify-between mb-3">
+        <h3 id="addrModalTitle" class="text-lg font-bold">إضافة عنوان</h3>
+        <button class="text-gray-500" onclick="closeModal('addressModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="grid gap-3">
+        <div class="grid sm:grid-cols-2 gap-3">
+          <label class="block">
+            <span class="text-sm text-gray-700">المسمى (اختياري)</span>
+            <input id="addrLabel" class="mt-1 w-full py-3 px-3" placeholder="المنزل / العمل">
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-700">المنطقة</span>
+            <select id="addrRegion" class="mt-1 w-full py-3 px-3"></select>
+          </label>
+        </div>
+        <label class="block">
+          <span class="text-sm text-gray-700">العنوان التفصيلي</span>
+          <input id="addrText" class="mt-1 w-full py-3 px-3" placeholder="الحي/الشارع/العلامة المميزة">
+        </label>
+        <div id="addrMap" class="w-full"></div>
+        <div class="flex items-center gap-2">
+          <button class="btn-ghost" onclick="locateMe()"><i class="fa-solid fa-location-crosshairs ml-2"></i> استخدام موقعي</button>
+          <span id="addrCoords" class="text-xs text-gray-600"></span>
+        </div>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <input id="addrDefault" type="checkbox">
+            <label for="addrDefault" class="text-sm">تعيين كعنوان افتراضي</label>
+          </div>
+          <div class="text-left">
+            <button class="px-4 py-2 rounded-lg border" onclick="closeModal('addressModal')">إلغاء</button>
+            <button id="saveAddrBtn" class="px-4 py-2 btn-primary ml-2" onclick="saveAddress()">حفظ</button>
+          </div>
+        </div>
+        <p id="addrCoverWarn" class="hidden text-sm text-red-600">لا نقوم بتغطية هذه المنطقة في الوقت الحالي.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  /* ========= Supabase ========= */
+  const SUPABASE_URL      = 'https://mvappgnbsjacreaspzah.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12YXBwZ25ic2phY3JlYXNwemFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMTg5MTEsImV4cCI6MjA3MzU5NDkxMX0.P06_egRm9sCeV0lnOrcUA_Py7bTj_-2GQvmcoQtldbM';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  /* ========= MapTiler ========= */
+  const MAPTILER_KEY = 'egBYkKA53maoIu3kL8fJ';
+  let map, marker;
+
+  /* ========= State ========= */
+  let authUser=null, currentUser=null, salonInfo=null;
+  let dbServices=[], servicesById={}, selectedServices=[];
+  let selectedDate=null, selectedSlot=null;
+  let userCars=[], userAddresses=[], allRegions=[];
+  let currentRegionId=null, currentVehicleId=null, currentVehicleName='', currentVehiclePlate='';
+  let editingAddressId=null;
+  let currentBookingsFilter='open';
+  let editingBooking=null;
+  let ratingForBookingId=null;
+  let shareConfig={ message:'جرب تطبيق غسيل السيارات – حجز بسهولة!', url: location.origin };
+
+  /* ========= Helpers ========= */
+  const $  = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  const addDays = (dateStr, days=1)=>{ const d=new Date(dateStr); d.setDate(d.getDate()+days); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+  const statusesHold = ['pending','confirmed','completed'];
+  function todayLocalISO(){ const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+  function genDefaultSlots(){ const base=['09:00:00','11:00:00','13:00:00','15:00:00','17:00:00','19:00:00','21:00:00','23:00:00'].map(t=>({id:`d_${t}`,slot_time:t,label:t.slice(0,5),is_next_day:false,is_active:true})); return [...base,{id:'d_01',slot_time:'01:00:00',label:'01:00',is_next_day:true,is_active:true},{id:'d_02',slot_time:'02:00:00',label:'02:00',is_next_day:true,is_active:true}] }
+
+  /* ========= Boot ========= */
+  document.addEventListener('DOMContentLoaded', async () => {
+    // منع تواريخ الماضي
+    ['bookingDate','editDate'].forEach(id=>{
+      const el=document.getElementById(id); if(!el) return;
+      const t=todayLocalISO(); el.min=t; if(!el.value||el.value<t) el.value=t;
+      el.addEventListener('input', e=>{ const tt=todayLocalISO(); if(e.target.value<tt) e.target.value=tt; renderSlotsForDate(); });
+    });
+
+    $('#loginBtn')?.addEventListener('click', signIn);
+    $('#signupBtn')?.addEventListener('click', signUp);
+    $('#logoutBtn')?.addEventListener('click', signOut);
+
+    $('#bookingDate')?.addEventListener('change', renderSlotsForDate);
+    $('#userAddressSelect')?.addEventListener('change', async ()=>{ await updateVehicleFromAddress(); await renderSlotsForDate(true); validateConfirm(); });
+
+    await bootstrapPublic();
+
+    const { data:{ session } } = await supabase.auth.getSession();
+    if (session?.user) { authUser=session.user; await postLoginSetup(); }
+
+    supabase.auth.onAuthStateChange(async (_e, s) => {
+      if (s?.user) { authUser=s.user; await postLoginSetup(true); }
+      else { authUser=null; currentUser=null; $('#mainApp')?.classList.add('hidden'); $('#authScreen')?.classList.remove('hidden'); }
+    });
+  });
+
+  async function bootstrapPublic(){
+    await fetchAppInfo();
+    await loadShareConfig();
+    await loadBanners();
+    await loadServices();
+    await loadRegions();
+    await loadTeam();   // جدول staff
+  }
+
+  /* ========= Branding/Banners ========= */
+  async function fetchAppInfo(){
+    try{
+      const { data } = await supabase.from('app_info').select('*').eq('active',true).order('updated_at',{ascending:false}).limit(1);
+      salonInfo = (data && data[0]) || {};
+      const logo = salonInfo.logo_url || 'https://placehold.co/300x300/png?text=Logo';
+      $('#brandLogo').src = logo; $('#brandLogoSmall').src = logo;
+      $('#brandName').textContent = salonInfo.name || 'كار ووش';
+      $('#brandNameSmall').textContent = salonInfo.name || 'كار ووش';
+      document.title = (salonInfo.name || 'كار ووش') + ' – حجوزات';
+    }catch(e){}
+  }
+  async function loadBanners(){
+    const { data } = await supabase.from('banners').select('*').eq('active',true).order('position');
+    const slides = (data && data.length) ? data : [
+      { title: 'خدمة الغسيل المتنقل', image_url: 'https://placehold.co/1200x450/png?text=Mobile+Wash' },
+      { title: 'خصومات نهاية الأسبوع', image_url: 'https://placehold.co/1200x450/png?text=Weekend+Deals' }
+    ];
+    const wrap = $('#bannersSwiperWrapper');
+    wrap.innerHTML = slides.map(b => `
+      <div class="swiper-slide"><div class="relative h-52 sm:h-64">
+        <img src="${b.image_url}" class="w-full h-full object-cover" alt="">
+        ${b.title ? `<div class="absolute bottom-3 right-3 bg-black/50 text-white px-3 py-1 rounded-lg text-sm">${b.title}</div>` : ''}
+      </div></div>`).join('');
+    new Swiper('.swiper',{loop:true,autoplay:{delay:3500},pagination:{el:'.swiper-pagination'},navigation:{nextEl:'.swiper-button-next',prevEl:'.swiper-button-prev'}});
+  }
+
+  /* ========= Services ========= */
+  async function loadServices(){
+    const { data } = await supabase.from('services').select('id,name_ar,price_egp,duration_min,image_url').eq('active',true).order('name_ar');
+    dbServices = data || []; servicesById={}; dbServices.forEach(s=>servicesById[s.id]=s);
+    const ph='https://placehold.co/600x400/png?text=Service';
+    const grid=$('#servicesGrid'); if(!grid) return;
+    grid.innerHTML = (dbServices||[]).map(s=>`
+      <button type="button" class="service-item p-0 glass text-right hover:brightness-95 transition overflow-hidden" data-id="${s.id}">
+        <div class="w-full h-28 overflow-hidden bg-indigo-50"><img src="${s.image_url||ph}" class="w-full h-full object-cover" alt="${s.name_ar}"></div>
+        <div class="p-3 flex items-center justify-between">
+          <h4 class="font-semibold">${s.name_ar}</h4>
+          <div class="text-left"><p class="font-bold text-[var(--brand)]">${s.price_egp} ج.م</p><p class="text-xs text-gray-500">${s.duration_min} دقيقة</p></div>
+        </div>
+      </button>`).join('');
+    $$('#servicesGrid .service-item').forEach(btn=>btn.addEventListener('click',()=>toggleService(btn.dataset.id,btn)));
+  }
+  function toggleService(id, el){
+    const exists=selectedServices.find(x=>x.id===id);
+    if(exists){ selectedServices=selectedServices.filter(x=>x.id!==id); el.classList.remove('ring-2','ring-[var(--brand)]'); }
+    else{
+      if(selectedServices.length>=3) return toast('يمكنك اختيار 3 خدمات كحد أقصى','warning');
+      const s=servicesById[id]; selectedServices.push({id,price:s.price_egp,duration:s.duration_min,name:s.name_ar}); el.classList.add('ring-2','ring-[var(--brand)]');
+    }
+    updateSelectedServicesUI();
+  }
+  function updateSelectedServicesUI(){
+    const box=$('#selectedServices'), list=$('#servicesList'), next=$('#step1Next');
+    if(!box) return;
+    if(!selectedServices.length){ box.classList.add('hidden'); if(next) next.disabled=true; return; }
+    box.classList.remove('hidden'); if(next) next.disabled=false;
+    list.innerHTML=selectedServices.map(s=>`<div class="flex justify-between items-center p-2 bg-white rounded-xl border"><span>${s.name}</span><span class="text-[var(--brand)] font-medium">${s.price} ج.م</span></div>`).join('');
+    const totalPrice=selectedServices.reduce((a,s)=>a+Number(s.price||0),0), totalDuration=selectedServices.reduce((a,s)=>a+Number(s.duration||0),0);
+    $('#totalPrice').textContent=`${totalPrice} ج.م`; $('#totalDuration').textContent=`${totalDuration} دقيقة`;
+  }
+
+  /* ========= Auth ========= */
+  function toggleAuth(mode){ const login=$('#loginForm'), signup=$('#signupForm'); if(mode==='signup'){ login.classList.add('hidden'); signup.classList.remove('hidden'); } else { signup.classList.add('hidden'); login.classList.remove('hidden'); } }
+  async function signIn(){ try{ const email=$('#email').value.trim(), password=$('#password').value; if(!email||!password) return toast('أدخل البريد وكلمة المرور','warning'); const { data, error }=await supabase.auth.signInWithPassword({ email, password }); if(error) throw error; authUser=data.user; await postLoginSetup(); }catch{ toast('فشل تسجيل الدخول','error'); } }
+  async function signUp(){ try{ const email=$('#signupEmail').value.trim(), full=$('#signupFullName').value.trim(), phone=$('#signupPhone').value.trim(), p1=$('#signupPassword').value, p2=$('#signupPasswordConfirm').value; if(!email||!full||!phone||!p1||!p2) return toast('أدخل جميع الحقول','warning'); if(p1!==p2) return toast('تأكيد كلمة المرور غير مطابق','warning'); const { data, error }=await supabase.auth.signUp({ email, password:p1, options:{ data:{ full_name:full, phone } } }); if(error) throw error; if(data.session?.user){ authUser=data.session.user; await postLoginSetup(true); toast('تم إنشاء الحساب وتسجيل الدخول','success'); } else { toast('تم إنشاء الحساب. فعِّل بريدك ثم سجّل الدخول.','info'); toggleAuth('login'); } }catch{ toast('فشل إنشاء الحساب','error'); } }
+  async function signOut(){ try{ await supabase.auth.signOut(); }finally{ authUser=null; currentUser=null; $('#mainApp')?.classList.add('hidden'); $('#authScreen')?.classList.remove('hidden'); window.location.replace(window.location.pathname); } }
+
+  /* ========= User Profile ========= */
+  async function ensureCustomerProfile(){
+    const { data:{ user } }=await supabase.auth.getUser(); if(!user) throw new Error('no session');
+    try{ const { data, error }=await supabase.rpc('ensure_customer_profile'); if(error) throw error; if(!data?.id) throw 0; currentUser=data; return data; }catch{}
+    const payload={ auth_user_id:user.id, email:user.email??null, full_name:user.user_metadata?.full_name??null, phone:user.user_metadata?.phone??null };
+    const up=await supabase.from('customers').upsert(payload,{ onConflict:'auth_user_id' }).select().single();
+    if(!up.error&&up.data){ currentUser=up.data; return up.data; }
+    const ins=await supabase.from('customers').insert(payload).select().single();
+    if(!ins.error&&ins.data){ currentUser=ins.data; return ins.data; }
+    const upd=await supabase.from('customers').update({ email:payload.email, full_name:payload.full_name, phone:payload.phone }).eq('auth_user_id',user.id).select().single();
+    currentUser=upd.data; return upd.data;
+  }
+
+  async function postLoginSetup(){
+    try{ await ensureCustomerProfile(); }catch{ toast('تعذر إنشاء ملف العميل','error'); }
+    $('#accountName')?.setAttribute('value', currentUser?.full_name || authUser?.user_metadata?.full_name || '');
+    $('#accountEmail')?.setAttribute('value', currentUser?.email || authUser?.email || '');
+    $('#accountPhone') && ($('#accountPhone').value=currentUser?.phone||'');
+    $('#phoneSnapshot') && ($('#phoneSnapshot').value=currentUser?.phone||'');
+    $('#userName').textContent=currentUser?.full_name || (authUser?.email || 'مستخدم');
+
+    $('#authScreen').classList.add('hidden'); $('#mainApp').classList.remove('hidden');
+
+    await Promise.all([loadUserCars(), loadUserAddresses(), loadBookings(), loadTeam()]);
+    await updateVehicleFromAddress(true);
+    await renderSlotsForDate();
+
+    showTab('home');
+
+    const needs = (!currentUser?.phone) || (userAddresses.length===0) || (userCars.length===0);
+    $('#onboardingHint').classList.toggle('hidden', !needs);
+  }
+
+  async function saveAccount(){ if(!currentUser) return; const phone=$('#accountPhone').value.trim(); if(!phone) return toast('أدخل رقم الموبايل','warning'); await supabase.from('customers').update({ phone }).eq('id', currentUser.id); try{ await supabase.auth.updateUser({ data:{ phone } }); }catch{} currentUser.phone=phone; $('#phoneSnapshot').value=phone; toast('تم حفظ رقم الموبايل','success'); validateConfirm(); }
+
+  /* ========= Regions / Addresses / Cars ========= */
+  async function loadRegions(){ const { data }=await supabase.from('regions').select('id,name_ar').order('name_ar'); allRegions=data||[]; const sel=$('#addrRegion'); if(sel) sel.innerHTML=allRegions.map(r=>`<option value="${r.id}">${r.name_ar}</option>`).join(''); }
+  async function loadUserCars(){ if(!currentUser) return; const { data }=await supabase.from('user_cars').select('*').eq('customer_id', currentUser.id).order('created_at',{ascending:false}); userCars=data||[]; const sel=$('#userCarSelect'); if(sel) sel.innerHTML = userCars.length ? userCars.map(c=>`<option value="${c.id}">${c.make_model||'سيارة'} • ${c.color||'-'} • ${c.plate_number||'-'}</option>`).join('') : `<option value="">لا توجد سيارات — أضف سيارة</option>`; const list=$('#profileCarsList'); if(list) list.innerHTML = userCars.length ? userCars.map(c=>`<div class="p-3 rounded-xl border bg-white flex items-center justify-between"><div><div class="font-semibold">${c.make_model||'سيارة'} • ${c.color||'-'}</div><div class="text-xs text-gray-600">لوحة: ${c.plate_number||'-'}</div></div><button class="btn-ghost text-red-600" onclick="deleteCar('${c.id}')"><i class="fa-solid fa-trash-can"></i> حذف</button></div>`).join('') : `<p class="text-gray-500">لا توجد سيارات بعد.</p>`; }
+  async function deleteCar(id){ if(!confirm('حذف هذه السيارة؟')) return; const { error }=await supabase.from('user_cars').delete().eq('id',id).eq('customer_id', currentUser.id); if(error) return toast('تعذر حذف السيارة (قد تكون مرتبطة بحجوزات)','error'); await loadUserCars(); toast('تم حذف السيارة','success'); }
+  function openAddCar(){ $('#addCarBox').classList.remove('hidden'); showTab('profile'); }
+  function closeAddCar(){ $('#addCarBox').classList.add('hidden'); }
+  async function saveNewCar(){ if(!currentUser) return; const make=$('#carMakeModel').value.trim(), color=$('#carColor').value.trim(), plate=$('#carPlate').value.trim(); if(!make||!plate) return toast('أدخل النوع ورقم اللوحة','warning'); const { error }=await supabase.from('user_cars').insert({ customer_id: currentUser.id, make_model: make, color, plate_number: plate }); if(error) return toast('تعذر حفظ السيارة','error'); await loadUserCars(); closeAddCar(); $('#carMakeModel').value=''; $('#carColor').value=''; $('#carPlate').value=''; toast('تم إضافة السيارة','success'); validateConfirm(); }
+
+  async function loadUserAddresses(selectId=null){
+    if(!currentUser) return;
+    let { data }=await supabase.from('user_addresses').select('id,label,address_text,latitude,longitude,region_id,is_default, regions:region_id(name_ar)').eq('customer_id', currentUser.id).order('is_default',{ascending:false}).order('created_at',{ascending:false});
+    userAddresses=data||[];
+    const sel=$('#userAddressSelect'); if(sel){ if(!userAddresses.length){ sel.innerHTML='<option value="">لا توجد عناوين — أضف عنوان</option>'; } else { sel.innerHTML=userAddresses.map(a=>{ const nm=a.label?`${a.label} • `:''; const reg=a.regions?.name_ar?` • ${a.regions.name_ar}`:''; return `<option value="${a.id}">${nm}${a.address_text}${reg}</option>`; }).join(''); const toSelect=selectId || (userAddresses.find(a=>a.is_default)?.id) || userAddresses[0].id; sel.value=String(toSelect); } }
+    const list=$('#addressesList'); if(list){ list.innerHTML=userAddresses.length?userAddresses.map(a=>`<div class="p-3 rounded-xl border bg-white"><div class="flex items-start justify-between gap-3"><div><div class="font-semibold">${a.label||'عنوان'} ${a.is_default?'<span class="ml-1 text-xs text-indigo-600">(افتراضي)</span>':''}</div><div class="text-xs text-gray-600">${a.address_text}</div><div class="text-xs text-gray-500 mt-1">${a.regions?.name_ar||''}</div></div><div class="flex items-center gap-2">${a.is_default?'':`<button class="btn-ghost" onclick="setDefaultAddress('${a.id}')"><i class="fa-regular fa-star"></i> افتراضي</button>`}<button class="btn-ghost" onclick="startEditAddress('${a.id}')"><i class="fa-solid fa-pen"></i> تعديل</button><button class="btn-ghost text-red-600" onclick="deleteAddress('${a.id}')"><i class="fa-solid fa-trash-can"></i> حذف</button></div></div></div>`).join(''):`<p class="text-gray-500">لا توجد عناوين بعد.</p>`; }
+  }
+
+  async function setDefaultAddress(addrId){ await supabase.from('user_addresses').update({ is_default:false }).eq('customer_id', currentUser.id); await supabase.from('user_addresses').update({ is_default:true }).eq('id',addrId).eq('customer_id', currentUser.id); await loadUserAddresses(addrId); await updateVehicleFromAddress(true); await renderSlotsForDate(true); toast('تم التعيين كافتراضي','success'); }
+
+  function openAddAddress(){ editingAddressId=null; $('#addrModalTitle').textContent='إضافة عنوان'; $('#addrLabel').value=''; $('#addrText').value=''; $('#addrDefault').checked = userAddresses.length===0; $('#addrCoverWarn').classList.add('hidden'); openModal('addressModal'); initMap(); setCoordsText(); }
+  function startEditAddress(id){ const a=userAddresses.find(x=>String(x.id)===String(id)); if(!a) return; editingAddressId=a.id; $('#addrModalTitle').textContent='تعديل العنوان'; $('#addrLabel').value=a.label||''; $('#addrText').value=a.address_text||''; $('#addrRegion').value=a.region_id||''; $('#addrDefault').checked=!!a.is_default; $('#addrCoverWarn').classList.add('hidden'); openModal('addressModal'); initMap(a.latitude,a.longitude); setCoordsText(a.latitude,a.longitude); }
+  async function deleteAddress(id){ if(!confirm('حذف هذا العنوان؟')) return; const { error }=await supabase.from('user_addresses').delete().eq('id',id).eq('customer_id', currentUser.id); if(error) return toast('تعذر حذف العنوان','error'); await loadUserAddresses(); await updateVehicleFromAddress(true); await renderSlotsForDate(true); toast('تم حذف العنوان','success'); }
+
+  async function saveAddress(){
+    const label=$('#addrLabel').value.trim(), regionId=$('#addrRegion').value, text=$('#addrText').value.trim();
+    const coords = marker?.getLngLat?.() || {lng:null,lat:null};
+    if(!regionId || !text) return toast('أدخل المنطقة والعنوان','warning');
+    // تحقق تغطية قبل الحفظ
+    const cover=await supabase.from('vehicle_regions').select('vehicle_id').eq('region_id', regionId).eq('active',true).limit(1);
+    if(!cover.data?.length){ $('#addrCoverWarn').classList.remove('hidden'); return; } else $('#addrCoverWarn').classList.add('hidden');
+
+    const payload={ customer_id: currentUser.id, label, region_id: regionId, address_text: text, latitude: coords.lat, longitude: coords.lng, is_default: $('#addrDefault').checked };
+    let res;
+    if(editingAddressId) res = await supabase.from('user_addresses').update(payload).eq('id', editingAddressId).eq('customer_id', currentUser.id).select().single();
+    else res = await supabase.from('user_addresses').insert(payload).select().single();
+    if(res.error) return toast('تعذر حفظ العنوان','error');
+    closeModal('addressModal');
+    await loadUserAddresses(res.data?.id);
+    await updateVehicleFromAddress(true);
+    await renderSlotsForDate(true);
+    toast('تم حفظ العنوان','success');
+  }
+
+  /* ========= Map ========= */
+  function initMap(lat=30.0444, lng=31.2357){
+    const styleUrl=`https://api.maptiler.com/maps/streets/style.json?key=${MAPTILER_KEY}`;
+    const center=[lng,lat];
+    if(!map){
+      map = new maplibregl.Map({ container:'addrMap', style:styleUrl, center, zoom:12, locale:'ar' });
+      map.addControl(new maplibregl.NavigationControl({ showCompass:false }), 'bottom-right');
+      map.on('click', (e)=>{ setMarker(e.lngLat.lng, e.lngLat.lat); });
+    }else{ map.setStyle(styleUrl); map.setCenter(center); map.setZoom(12); }
+    setMarker(lng,lat);
+  }
+  function setMarker(lng,lat){ if(!marker){ marker = new maplibregl.Marker({ color:'#5568FE' }).setLngLat([lng,lat]).addTo(map); } else { marker.setLngLat([lng,lat]); } setCoordsText(lat,lng); }
+  function setCoordsText(lat, lng){ const c=$('#addrCoords'); if(!c) return; if(lat && lng) c.textContent=`إحداثيات: ${lat.toFixed(5)}, ${lng.toFixed(5)}`; else c.textContent=''; }
+  function locateMe(){ if(!navigator.geolocation) return toast('اللوكيشن غير مدعوم على جهازك','warning'); navigator.geolocation.getCurrentPosition(pos=>{ const { latitude:lat, longitude:lng } = pos.coords; if(map){ map.setCenter([lng,lat]); map.setZoom(14); } setMarker(lng,lat); }, ()=> toast('تعذر الحصول على موقعك','error'), { enableHighAccuracy:true, timeout:7000 }); }
+
+  /* ========= Vehicle from Region (مُحدّثة) ========= */
+  async function updateVehicleFromAddress(fromDefault=false){
+    try{
+      let addrId = $('#userAddressSelect')?.value;
+      if (fromDefault || !addrId){
+        const def = userAddresses.find(a=>a.is_default) || userAddresses[0];
+        addrId = def?.id;
+        if (addrId && $('#userAddressSelect')) $('#userAddressSelect').value = String(addrId);
+      }
+      const addr = userAddresses.find(a=>String(a.id)===String(addrId));
+
+      currentRegionId = addr ? addr.region_id : null;
+      currentVehicleId = null; currentVehicleName=''; currentVehiclePlate='';
+
+      if (!addr){
+        $('#vehicleHint').textContent=''; $('#vehicleHintStep3').textContent='';
+        return;
+      }
+
+      const { data: cover, error: covErr } = await supabase
+        .from('vehicle_regions')
+        .select('vehicle_id')
+        .eq('region_id', currentRegionId)
+        .eq('active', true)
+        .order('priority', { ascending:true })
+        .limit(1);
+
+      if (covErr) console.warn('vehicle_regions error', covErr);
+
+      if (cover?.length){
+        const ve = await supabase
+          .from('service_vehicles')
+          .select('display_name,plate_number')
+          .eq('id', cover[0].vehicle_id)
+          .maybeSingle();
+
+        if (!ve.error && ve.data){
+          currentVehicleId   = cover[0].vehicle_id;
+          currentVehicleName = ve.data.display_name || 'عربة خدمة';
+          currentVehiclePlate= ve.data.plate_number || '';
+        }
+      }
+
+      const txt = currentVehicleId
+        ? `العربية المخصصة لهذه المنطقة: ${currentVehicleName}${currentVehiclePlate?` • لوحة: ${currentVehiclePlate}`:''}`
+        : '';
+      $('#vehicleHint').textContent = txt;
+      $('#vehicleHintStep3').textContent = txt;
+
+      // املأ رقم الموبايل للعرض فقط
+      $('#phoneSnapshot') && ($('#phoneSnapshot').value = currentUser?.phone || '');
+    }catch(err){
+      console.error('updateVehicleFromAddress', err);
+      $('#vehicleHint').textContent=''; $('#vehicleHintStep3').textContent='';
+      currentVehicleId=null; currentVehicleName=''; currentVehiclePlate='';
+    }finally{
+      validateConfirm();
+    }
+  }
+
+  /* ========= Slots (مُحدّثة) ========= */
+  async function renderSlotsForDate(){
+    const dateInput=$('#bookingDate'), grid=$('#slotsGrid'), offNote=$('#offDayNote'), needWrap=$('#needAddressWrap');
+    if(!grid) return;
+
+    grid.innerHTML=''; offNote.classList.add('hidden'); needWrap.classList.add('hidden');
+    $('#step2Next') && ($('#step2Next').disabled=true); selectedSlot=null;
+
+    if(!userAddresses.length){
+      needWrap.classList.remove('hidden');
+      grid.innerHTML='<div class="col-span-full text-center text-orange-600 py-2">أضف عنوانًا أولاً</div>';
+      return;
+    }
+
+    // حتى لو حصل خطأ في تعيين العربية → كمّل وارسم مواعيد افتراضية
+    try{ await updateVehicleFromAddress(); }catch(e){ console.warn(e); }
+
+    // امنع تواريخ الماضي
+    const today=todayLocalISO();
+    if(dateInput){
+      if(!dateInput.min||dateInput.min<today) dateInput.min=today;
+      if(!dateInput.value||dateInput.value<today) dateInput.value=today;
+    }
+    const date = dateInput?.value || today;
+    selectedDate = date;
+
+    // يوم إجازة؟
+    try{
+      const off = await supabase.from('days_off').select('off_date').eq('off_date', date).maybeSingle();
+      if(off.data?.off_date){
+        offNote.classList.remove('hidden');
+        grid.innerHTML='<div class="col-span-full text-center text-red-600 font-semibold py-2">لا توجد مواعيد متاحة اليوم</div>';
+        return;
+      }
+    }catch{ /* تجاهل */ }
+
+    // احصل على المواعيد أو افتراضي
+    let slots = [];
+    try{
+      const res = await supabase.from('time_slots').select('id,slot_time,label,is_next_day,is_active').eq('is_active',true);
+      slots = (res?.data?.length)
+        ? res.data.sort((a,b)=>(Number(a.is_next_day)-Number(b.is_next_day)) || (a.slot_time>b.slot_time?1:-1))
+        : genDefaultSlots();
+    }catch{ slots = genDefaultSlots(); }
+
+    const nextDate=addDays(date,1);
+    let setToday=new Set(), setNext=new Set();
+
+    // لو معرفناش العربية → اعتبر كل المواعيد متاحة
+    if(currentVehicleId){
+      try{
+        const t0=await supabase.from('bookings').select('booking_time')
+          .eq('booking_date',date).eq('service_vehicle_id',currentVehicleId).in('status',statusesHold);
+        const t1=await supabase.from('bookings').select('booking_time')
+          .eq('booking_date',nextDate).lt('booking_time','03:00:00').eq('service_vehicle_id',currentVehicleId).in('status',statusesHold);
+        setToday=new Set((t0.data||[]).map(r=>r.booking_time));
+        setNext =new Set((t1.data||[]).map(r=>r.booking_time));
+      }catch(e){ console.warn('bookings fetch for slots', e); }
+    }
+
+    let available=0;
+    grid.innerHTML = (slots||[]).map(s=>{
+      const t=s.slot_time;
+      const reserved = s.is_next_day ? setNext.has(t) : setToday.has(t);
+      if(!reserved) available++;
+      const label=s.label || String(t).slice(0,5);
+      return `<button type="button" class="slot-btn ${reserved?'opacity-50':''}" ${reserved?'disabled':''}
+                data-time="${t}" data-next="${s.is_next_day?'1':'0'}">${label}</button>`;
+    }).join('');
+
+    $$('#slotsGrid .slot-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        $$('#slotsGrid .slot-btn').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedSlot={ time:btn.dataset.time, is_next_day:btn.dataset.next==='1', label:btn.textContent.trim() };
+        $('#step2Next').disabled=false; validateConfirm();
+      });
+    });
+
+    if(!available){
+      grid.insertAdjacentHTML('afterbegin',
+        '<div class="col-span-full text-center text-red-600 font-semibold py-2">لا توجد مواعيد متاحة للحجز في هذا اليوم</div>');
+    }
+  }
+  function reloadSlots(){ renderSlotsForDate(true); }
+
+  /* ========= Booking Wizard Navigation ========= */
+  function showBookingWizard(){ showTab('booking'); ['step1','step2','step3'].forEach((id,i)=>document.getElementById(id).classList.toggle('hidden',i!==0)); }
+  function nextStep(n){ ['step1','step2','step3'].forEach((id,i)=>document.getElementById(id).classList.toggle('hidden', (i!==n-1))); if(n===2) renderSlotsForDate(); if(n===3) validateConfirm(); }
+  function prevStep(n){ nextStep(n); }
+
+  function validateConfirm(){
+    const hasServices = selectedServices.length>0;
+    const hasDateTime = !!selectedDate && !!selectedSlot;
+    const hasPhone = !!(currentUser?.phone);
+    const hasAddress = userAddresses.length>0 && $('#userAddressSelect')?.value;
+    const hasCar = userCars.length>0 && $('#userCarSelect')?.value;
+    $('#confirmBtn') && ($('#confirmBtn').disabled = !(hasServices && hasDateTime && hasPhone && hasAddress && hasCar));
+  }
+
+  /* ========= Confirm Booking (يتضمن phone_snapshot) ========= */
+  async function confirmBooking(){
+    if($('#confirmBtn').disabled) return;
+
+    // 1) تأكد من وجود رقم موبايل
+    const phone = (currentUser?.phone || '').trim();
+    if (!phone){
+      toast('يرجى إضافة رقم الموبايل من صفحة الحساب أولًا','warning');
+      showTab('profile');
+      return;
+    }
+
+    // 2) العنوان المحدد
+    const addrId=$('#userAddressSelect').value;
+    const addr=userAddresses.find(a=>String(a.id)===String(addrId));
+    if(!addr) return toast('اختر العنوان','warning');
+
+    // 3) العربية المخصصة للمنطقة
+    const cover=await supabase.from('vehicle_regions')
+      .select('vehicle_id').eq('region_id', addr.region_id)
+      .eq('active',true).order('priority',{ascending:true}).limit(1);
+
+    if(!cover.data?.length) return toast('لا نقوم بتغطية هذه المنطقة في الوقت الحالي','warning');
+    const vid=cover.data[0].vehicle_id;
+
+    // 4) التاريخ/الوقت (تعامل مع اليوم التالي)
+    let bDate=selectedDate;
+    if(selectedSlot?.is_next_day) bDate = addDays(bDate,1);
+    const bTime=selectedSlot?.time;
+
+    // 5) منع التعارض لنفس السيارة
+    const clash=await supabase.from('bookings')
+      .select('id').eq('service_vehicle_id', vid)
+      .eq('booking_date', bDate).eq('booking_time', bTime)
+      .in('status',['pending','confirmed','completed']).limit(1);
+    if(clash.data?.length) return toast('الموعد محجوز بالفعل لهذه السيارة','warning');
+
+    // 6) حساب الإجمالي والمدة
+    const totalPrice=selectedServices.reduce((a,s)=>a+Number(s.price||0),0);
+    const totalDuration=selectedServices.reduce((a,s)=>a+Number(s.duration||0),0);
+    const code='B'+Math.random().toString(36).slice(2,8).toUpperCase();
+
+    // 7) الإنشاء مع تضمين phone_snapshot
+    const payload={
+      customer_id: currentUser.id,
+      user_address_id: addr.id,
+      region_id: addr.region_id,
+      address_text: addr.address_text,
+      latitude: addr.latitude || null,
+      longitude: addr.longitude || null,
+      service_vehicle_id: vid,
+      booking_date: bDate,
+      booking_time: bTime,
+      status: 'pending',
+      total_price_egp: totalPrice,
+      total_duration_min: totalDuration,
+      notes: $('#notes').value.trim() || null,
+      booking_code: code,
+      phone_snapshot: phone
+    };
+
+    const ins=await supabase.from('bookings').insert(payload).select().single();
+    if (ins.error){
+      console.warn(ins.error);
+      const msg = ins.error?.message || ins.error?.hint || 'تعذر تنفيذ الحجز';
+      return toast(`تعذر تنفيذ الحجز: ${msg}`, 'error');
+    }
+    const bookingId=ins.data.id;
+
+    // 8) حفظ الخدمات المرتبطة (لو الجدول موجود)
+    try{
+      await supabase.from('booking_services').insert(
+        selectedServices.map(s=>({
+          booking_id: bookingId, service_id: s.id,
+          price_egp: s.price, duration_min: s.duration
+        }))
+      );
+    }catch(e){ /* تجاهل لو الجدول غير موجود */ }
+
+    // 9) إيصال بسيط
+    $('#receiptContent').innerHTML = `
+      <div class="text-center mb-3">
+        <h3 class="font-bold text-xl">تم إنشاء الحجز</h3>
+        <div class="text-sm text-gray-600">رقم الحجز: <span class="font-semibold">${code}</span></div>
+      </div>
+      <div class="space-y-2 text-sm text-gray-700">
+        <div><i class="fa-regular fa-calendar ml-1"></i>${bDate} • <i class="fa-regular fa-clock ml-1"></i>${bTime.slice(0,5)}</div>
+        <div>العنوان: ${addr.address_text}</div>
+        <div>الموبايل: ${phone}</div>
+        <div>الإجمالي: <span class="font-semibold text-[var(--brand)]">${totalPrice} ج.م</span></div>
+      </div>
+    `;
+    openModal('receiptModal');
+
+    // 10) إعادة تهيئة الواجهة
+    selectedServices=[]; updateSelectedServicesUI(); selectedSlot=null; validateConfirm();
+    loadBookings('open'); renderSlotsForDate(true);
+    showTab('bookings');
+  }
+
+  /* ========= Bookings List + Actions ========= */
+  function openBookingsWithFilter(filter){ currentBookingsFilter=filter||'open'; showTab('bookings'); setBookingsFilter(filter); }
+  function setBookingsFilter(filter){
+    currentBookingsFilter = filter;
+    $('#filterOpen')?.classList.toggle('active', filter==='open');
+    $('#filterCompleted')?.classList.toggle('active', filter==='completed');
+    $('#filterCancelled')?.classList.toggle('active', filter==='cancelled');
+    loadBookings(filter);
+  }
+  async function loadBookings(filter=''){
+    if(!currentUser) return;
+    let qry=supabase.from('bookings').select('id,booking_code,booking_date,booking_time,status,total_price_egp').eq('customer_id', currentUser.id);
+    if(filter==='open') qry=qry.in('status',['pending','confirmed']); else if(filter==='completed') qry=qry.eq('status','completed'); else if(filter==='cancelled') qry=qry.eq('status','cancelled');
+    qry=qry.order('created_at',{ascending:false});
+    const { data }=await qry;
+
+    const allRes=await supabase.from('bookings').select('status').eq('customer_id', currentUser.id);
+    if(allRes?.data){ const all=allRes.data; $('#openBookingsCount').textContent=all.filter(b=>['pending','confirmed'].includes(b.status)).length; $('#completedBookingsCount').textContent=all.filter(b=>b.status==='completed').length; $('#cancelledBookingsCount').textContent=all.filter(b=>b.status==='cancelled').length; }
+
+    const ids=(data||[]).map(b=>b.id); let rated=new Set();
+    if(ids.length){ const r=await supabase.from('booking_ratings').select('booking_id').in('booking_id', ids); rated=new Set((r.data||[]).map(x=>x.booking_id)); }
+
+    const container=$('#bookingsList'); if(!container) return;
+    if(!data?.length){ container.innerHTML='<p class="text-center text-gray-500 py-8">لا توجد حجوزات في هذا الفلتر</p>'; return; }
+    const statusColors={ pending:'bg-yellow-100 text-yellow-800', confirmed:'bg-indigo-100 text-indigo-800', completed:'bg-green-100 text-green-800', cancelled:'bg-red-100 text-red-800' };
+    container.innerHTML = data.map(b=>{
+      const actions = b.status==='cancelled' ? ''
+        : b.status==='completed'
+          ? (!rated.has(b.id) ? `<button class="btn-ghost" onclick="openRating('${b.id}')"><i class="fa-solid fa-star"></i> قيّم</button>` : `<span class="text-xs text-green-700">تم التقييم</span>`)
+          : `<button class="btn-ghost text-red-600" onclick="cancelBooking('${b.id}')"><i class="fa-solid fa-ban"></i> إلغاء</button>
+             <button class="btn-ghost" onclick="openEditBooking('${b.id}')"><i class="fa-solid fa-pen"></i> تعديل</button>`;
+      return `
+      <div class="p-4 glass">
+        <div class="flex justify-between items-start mb-3">
+          <div><h4 class="font-semibold text-lg">#${b.booking_code||b.id}</h4></div>
+          <span class="px-3 py-1 rounded-full text-sm font-medium ${statusColors[b.status]}">${b.status==='pending'?'قيد الانتظار':b.status==='confirmed'?'مؤكد':b.status==='completed'?'منتهي':'ملغي'}</span>
+        </div>
+        <div class="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-2">
+          <div><i class="fa-regular fa-calendar ml-1"></i>${b.booking_date}</div>
+          <div><i class="fa-regular fa-clock ml-1"></i>${b.booking_time?.slice(0,5)}</div>
+          <div><i class="fa-solid fa-money-bill ml-1"></i>${b.total_price_egp||0} ج.م</div>
+        </div>
+        <div class="flex items-center gap-2">${actions}</div>
+      </div>`;
+    }).join('');
+  }
+  async function cancelBooking(id){
+    if(!confirm('تأكيد إلغاء هذا الحجز؟')) return;
+    const { error }=await supabase.from('bookings').update({ status:'cancelled' }).eq('id', id).eq('customer_id', currentUser.id);
+    if(error) return toast('تعذر الإلغاء','error');
+    toast('تم إلغاء الحجز','success'); loadBookings(currentBookingsFilter); renderSlotsForDate(true);
+  }
+  async function openEditBooking(id){
+    const res=await supabase.from('bookings').select('*').eq('id', id).eq('customer_id', currentUser.id).maybeSingle();
+    if(res.error||!res.data) return toast('تعذر فتح الحجز','error');
+    editingBooking = res.data;
+    await loadUserAddresses(editingBooking.user_address_id);
+    $('#editAddressSelect').innerHTML = userAddresses.map(a=>`<option value="${a.id}" ${String(a.id)===String(editingBooking.user_address_id)?'selected':''}>${a.address_text}</option>`).join('');
+    const el=$('#editDate'); const t=todayLocalISO(); el.min=t; el.value = (editingBooking.booking_date >= t) ? editingBooking.booking_date : t;
+    await updateEditVehicleHint();
+    await renderEditSlots();
+    openModal('editBookingModal');
+  }
+  async function updateEditVehicleHint(){
+    const addrId=$('#editAddressSelect').value;
+    const addr=userAddresses.find(a=>String(a.id)===String(addrId));
+    let txt=''; if(addr){ const cover=await supabase.from('vehicle_regions').select('vehicle_id').eq('region_id', addr.region_id).eq('active',true).order('priority',{ascending:true}).limit(1); if(cover.data?.length){ const ve=await supabase.from('service_vehicles').select('display_name,plate_number').eq('id', cover.data[0].vehicle_id).maybeSingle(); txt=`العربة: ${ve.data?.display_name||'-'} ${ve.data?.plate_number?('• '+ve.data.plate_number):''}`; editingBooking._edit_vehicle_id = cover.data[0].vehicle_id; } else { txt='لا نقوم بتغطية هذه المنطقة في الوقت الحالي'; } }
+    $('#editVehicleHint').textContent=txt;
+  }
+  async function renderEditSlots(){
+    const el=$('#editDate'); const date=el.value || todayLocalISO();
+    const nextDate=addDays(date,1);
+    const res=await supabase.from('time_slots').select('id,slot_time,label,is_next_day,is_active').eq('is_active',true);
+    const slots = (!res.error && res.data?.length) ? res.data.sort((a,b)=>(Number(a.is_next_day)-Number(b.is_next_day)) || (a.slot_time>b.slot_time?1:-1)) : genDefaultSlots();
+
+    const vid = editingBooking._edit_vehicle_id || editingBooking.service_vehicle_id;
+    let takenToday=new Set(), takenNext=new Set();
+    if(vid){
+      const t0=await supabase.from('bookings').select('booking_time').eq('booking_date', date).eq('service_vehicle_id', vid).in('status',statusesHold);
+      const t1=await supabase.from('bookings').select('booking_time').eq('booking_date', nextDate).lt('booking_time','03:00:00').eq('service_vehicle_id', vid).in('status',statusesHold);
+      takenToday=new Set((t0.data||[]).map(r=>r.booking_time)); takenNext=new Set((t1.data||[]).map(r=>r.booking_time));
+    }
+
+    const grid=$('#editSlotsGrid'); grid.innerHTML = slots.map(s=>{
+      const t=s.slot_time; const reserved=s.is_next_day?takenNext.has(t):takenToday.has(t);
+      const label=s.label||t.slice(0,5);
+      return `<button type="button" class="slot-btn ${reserved?'opacity-50':''}" ${reserved?'disabled':''} data-time="${t}" data-next="${s.is_next_day?'1':'0'}">${label}</button>`;
+    }).join('');
+
+    $('#saveEditBtn').disabled=true;
+    $$('#editSlotsGrid .slot-btn').forEach(btn=>btn.addEventListener('click',()=>{ $$('#editSlotsGrid .slot-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); editingBooking._chosen_slot={ time:btn.dataset.time, is_next_day:btn.dataset.next==='1' }; $('#saveEditBtn').disabled=false; }));
+    $('#editAddressSelect').onchange = async ()=>{ await updateEditVehicleHint(); await renderEditSlots(); };
+  }
+  async function saveEditBooking(){
+    if(!editingBooking || !editingBooking._chosen_slot) return;
+    const addrId=$('#editAddressSelect').value;
+    const addr=userAddresses.find(a=>String(a.id)===String(addrId)); if(!addr) return toast('اختر عنواناً','warning');
+
+    let bDate=$('#editDate').value; if(editingBooking._chosen_slot.is_next_day) bDate=addDays(bDate,1);
+    const bTime=editingBooking._chosen_slot.time;
+    const vid=editingBooking._edit_vehicle_id || editingBooking.service_vehicle_id;
+
+    const clash=await supabase.from('bookings').select('id').eq('service_vehicle_id', vid).eq('booking_date', bDate).eq('booking_time', bTime).in('status',statusesHold).neq('id', editingBooking.id).limit(1);
+    if(clash.data?.length) return toast('الموعد محجوز بالفعل لهذه السيارة','warning');
+
+    const { error }=await supabase.from('bookings').update({
+      booking_date: bDate, booking_time: bTime,
+      user_address_id: addr.id, region_id: addr.region_id,
+      address_text: addr.address_text, latitude: addr.latitude||null, longitude: addr.longitude||null,
+      service_vehicle_id: vid
+    }).eq('id', editingBooking.id).eq('customer_id', currentUser.id);
+
+    if(error) return toast('تعذر حفظ التعديلات','error');
+    closeModal('editBookingModal'); toast('تم تحديث الحجز','success');
+    loadBookings(currentBookingsFilter); renderSlotsForDate(true);
+  }
+
+  /* ========= Rating ========= */
+  function openRating(id){ ratingForBookingId=id; setStars(0); $('#ratingComment').value=''; $('#submitRatingBtn').disabled=true; openModal('ratingModal'); }
+  function setStars(n){ $$('#stars .star').forEach(s=>s.classList.toggle('active', Number(s.dataset.v)<=n)); $('#submitRatingBtn').disabled = n<=0; $('#submitRatingBtn').dataset.rating = n; }
+  $$('#stars .star').forEach(el=> el.addEventListener('click', ()=> setStars(Number(el.dataset.v)) ));
+  async function submitRating(){
+    const rating = Number($('#submitRatingBtn').dataset.rating||0);
+    if(!rating || !ratingForBookingId) return;
+    const comment=$('#ratingComment').value.trim() || null;
+    const { error }=await supabase.from('booking_ratings').insert({ booking_id: ratingForBookingId, customer_id: currentUser.id, rating, comment });
+    if(error) return toast('تعذر إرسال التقييم','error');
+    closeModal('ratingModal'); toast('شكرًا على تقييمك!','success'); loadBookings(currentBookingsFilter);
+  }
+
+  /* ========= Share ========= */
+  async function loadShareConfig(){
+    try{
+      const { data }=await supabase.from('share').select('message,url').eq('active',true).order('created_at',{ascending:false}).limit(1);
+      if(data?.length){ shareConfig={ message:data[0].message||shareConfig.message, url:data[0].url||shareConfig.url }; }
+    }catch{}
+  }
+  async function shareApp(){
+    const text = `${shareConfig.message} ${shareConfig.url}`;
+    if (navigator.share){
+      try{ await navigator.share({ title: salonInfo?.name || 'كار ووش', text: shareConfig.message, url: shareConfig.url }); return; }catch(e){}
+    }
+    const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    const fb = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareConfig.url)}&quote=${encodeURIComponent(shareConfig.message)}`;
+    const w = window.open(wa, '_blank'); if(!w) { window.open(fb, '_blank'); }
+  }
+
+  /* ========= Tabs ========= */
+  function showTab(tab){ ['home','bookings','booking','profile'].forEach(t=>{ document.getElementById(t+'Tab')?.classList.add('hidden'); $$(`nav [data-tab="${t}"]`).forEach(btn=>btn.classList.remove('bn-active')); }); document.getElementById(tab+'Tab')?.classList.remove('hidden'); $$(`nav [data-tab="${tab}"]`).forEach(btn=>btn.classList.add('bn-active')); if(tab==='bookings'){ if(!currentBookingsFilter) currentBookingsFilter='open'; setBookingsFilter(currentBookingsFilter); } if(tab==='home'){ loadTeam(); } }
+
+  /* ========= Team (staff) ========= */
+  async function loadTeam(){
+    const grid = document.getElementById('teamGrid');
+    try{
+      const { data, error } = await supabase
+        .from('staff')
+        .select('display_name, role, avatar_url, avatar_emoji, experience_years, rating_avg, active, created_at')
+        .eq('active', true)
+        .order('rating_avg', { ascending: false })
+        .order('experience_years', { ascending: false })
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const team=(data||[]);
+      if(!team.length){
+        grid.innerHTML='<div class="col-span-full text-gray-500 text-sm">لا يوجد موظفون حاليًا.</div>';
+        return;
+      }
+
+      grid.innerHTML = team.map(e=>{
+        const name = e.display_name || 'موظف';
+        const role = e.role || '';
+        const hasImg = !!(e.avatar_url && String(e.avatar_url).trim());
+        const hasEmoji = !!(e.avatar_emoji && String(e.avatar_emoji).trim());
+        const avatar = hasImg
+          ? `<img src="${e.avatar_url}" class="w-20 h-20 rounded-full object-cover mx-auto mb-2 border shadow-sm" alt="${name}">`
+          : hasEmoji
+            ? `<div class="w-20 h-20 rounded-full mx-auto mb-2 grid place-items-center border bg-gradient-to-br from-indigo-50 to-amber-50"><div class="text-3xl">${e.avatar_emoji}</div></div>`
+            : `<div class="w-20 h-20 rounded-full mx-auto mb-2 grid place-items-center border bg-gradient-to-br from-indigo-50 to-amber-50 text-indigo-500"><i class="fa-solid fa-user-gear text-2xl"></i></div>`;
+        return `<div class="p-4 glass text-center">${avatar}<div class="font-semibold">${name}</div><div class="text-xs text-gray-500">${role}</div></div>`;
+      }).join('');
+    }catch(err){
+      console.error('loadTeam error:', err);
+      if(grid) grid.innerHTML = `<div class="col-span-full text-red-600 text-sm">تعذر تحميل فريق العمل: ${err.message||''}</div>`;
+    }
+  }
+
+  /* ========= Modal/Toast ========= */
+  function openModal(id){ document.getElementById(id)?.classList.add('show'); }
+  function closeModal(id){ document.getElementById(id)?.classList.remove('show'); }
+  function toast(msg,type='info'){ const host=$('#notifications'); const bg=type==='success'?'bg-green-600':type==='error'?'bg-red-600':type==='warning'?'bg-yellow-600':'bg-slate-800'; const el=document.createElement('div'); el.className=`${bg} text-white px-3 py-2 rounded-lg shadow`; el.textContent=msg; host.appendChild(el); setTimeout(()=>el.remove(),3200); }
+  </script>
+</body>
+</html>
