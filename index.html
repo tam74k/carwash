@@ -75,18 +75,6 @@
     }
     .fab-share .txt{ display:none }
     @media (min-width:480px){ .fab-share .txt{ display:inline } }
-
-    /* زر الحجز الدائري في منتصف البار */
-    .bn-fab{
-      position:fixed; left:50%;
-      bottom:calc(var(--bottom-nav-h) + 10px);
-      transform:translateX(-50%);
-      width:74px; height:74px; border-radius:50%;
-      background-image:linear-gradient(90deg,var(--brand),var(--brand-2));
-      color:#fff; display:grid; place-items:center; font-size:26px;
-      box-shadow:0 14px 32px rgba(85,104,254,.35);
-      z-index:60; border:4px solid #fff; cursor:pointer;
-    }
   </style>
 </head>
 <body class="bg-orbs">
@@ -98,7 +86,8 @@
       <div class="grid md:grid-cols-2">
         <div class="p-10 grid place-items-center bg-gradient-to-br from-[#efeaff] to-[#fff7eb]">
           <div class="text-center">
-            <img id="brandLogo" class="w-36 h-36 object-contain bg-white rounded-2xl border shadow" alt="الشعار">
+            <!-- كبرنا اللوجو ووسطنّاه داخل نفس المربع -->
+            <img id="brandLogo" class="w-44 h-44 object-contain bg-white rounded-2xl border shadow mx-auto" alt="الشعار">
             <div id="brandName" class="mt-4 text-2xl md:text-3xl font-extrabold text-slate-900">كار ووش</div>
           </div>
         </div>
@@ -155,13 +144,20 @@
   <!-- ================= APP ================= -->
   <section id="mainApp" class="hidden pb-safe">
     <header class="bg-transparent backdrop-blur sticky top-0 z-30">
-      <div class="container-narrow px-4 py-3 grid grid-cols-[auto_1fr_auto] items-center gap-3">
+      <div class="container-narrow px-4 py-3 grid grid-cols-[auto_1fr_auto_auto] items-center gap-3">
         <div class="flex items-center gap-3 justify-self-center">
           <img id="brandLogoSmall" class="w-10 h-10 rounded-xl object-cover border" alt="logo">
           <div>
             <h2 id="brandNameSmall" class="text-lg font-extrabold text-slate-900">كار ووش</h2>
             <p class="text-xs text-gray-500">مرحبًا، <span id="userName">ضيف</span></p>
           </div>
+        </div>
+        <!-- زر جرس الإشعارات + نقطة غير المقروء -->
+        <div class="justify-self-end">
+          <button id="btnNotifications" class="relative p-2 rounded-lg border bg-white" title="الإشعارات">
+            <i class="fa-regular fa-bell text-lg"></i>
+            <span id="notifDot" class="hidden absolute -top-1 -left-1 w-3 h-3 rounded-full bg-red-500"></span>
+          </button>
         </div>
         <div class="justify-self-end">
           <button id="logoutBtn" type="button" onclick="signOut()" class="px-3 py-1.5 rounded-lg border text-sm cursor-pointer">خروج</button>
@@ -227,6 +223,14 @@
         <div id="bookingsList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
       </div>
 
+      <!-- العروض (جديدة) -->
+      <div id="offersTab" class="tab-content hidden">
+        <div class="flex items-center justify_between mb-3">
+          <h3 class="font-bold text-lg">العروض</h3>
+        </div>
+        <div id="offersList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+
       <!-- الحجز: معالج كامل -->
       <div id="bookingTab" class="tab-content hidden">
         <!-- الخطوة 1 -->
@@ -276,7 +280,7 @@
           <div class="mt-6 mb-20 flex justify-between">
             <button class="px-4 py-2 rounded-lg border" onclick="prevStep(1)"><i class="fa-solid fa-arrow-right ml-2"></i> رجوع</button>
             <button id="step2Next" class="px-4 py-2 btn-primary disabled:opacity-40" disabled onclick="nextStep(3)">
-              التالي <i class="fa-solid fa-arrow-left mr-2"></i>
+              التالي <i class="fa-solid fa-arrow_left mr-2"></i>
             </button>
           </div>
         </div>
@@ -380,26 +384,30 @@
           </div>
         </div>
       </div>
+
+      <!-- الإشعارات (جديدة) -->
+      <div id="notificationsTab" class="tab-content hidden">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-lg">الإشعارات</h3>
+          <button id="btnBackFromNotif" class="btn-ghost">رجوع</button>
+        </div>
+        <div id="notificationsList" class="space-y-2"></div>
+      </div>
     </main>
 
-    <!-- Bottom Nav -->
+    <!-- Bottom Nav (معدّل: 4 أيقونات فقط) -->
     <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur z-40" style="height: var(--bottom-nav-h);">
       <div class="max-w-[1120px] mx-auto px-4 h-full">
         <div class="grid grid-cols-4 h-full">
           <button class="py-3 text-center text-gray-600 bn-active" data-tab="home" onclick="showTab('home')"><i class="fa-solid fa-house text-lg"></i><div class="text-xs">الرئيسية</div></button>
           <button class="py-3 text-center text-gray-600" data-tab="bookings" onclick="showTab('bookings'); setBookingsFilter('open');"><i class="fa-regular fa-calendar-check text-lg"></i><div class="text-xs">حجوزاتي</div></button>
-          <div></div>
+          <button class="py-3 text-center text-gray-600" data-tab="offers" onclick="showTab('offers');"><i class="fa-solid fa-tags text-lg"></i><div class="text-xs">العروض</div></button>
           <button class="py-3 text-center text-gray-600" data-tab="profile" onclick="showTab('profile')"><i class="fa-solid fa-user text-lg"></i><div class="text-xs">حسابي</div></button>
         </div>
       </div>
     </nav>
 
-    <!-- زر الحجز الدائري -->
-    <button class="bn-fab" onclick="showBookingWizard()" title="حجز جديد">
-      <i class="fa-solid fa-plus"></i>
-    </button>
-
-    <!-- زر الشير العائم -->
+    <!-- زر الشير العائم (يظل كما هو) -->
     <button class="fab-share" onclick="shareApp()" title="مشاركة التطبيق">
       <i class="fa-solid fa-share-nodes text-lg"></i>
       <span class="txt font-bold">مشاركة</span>
@@ -418,7 +426,7 @@
   </div>
 
   <!-- تعديل حجز -->
-  <div id="editBookingModal" class="modal fixed inset-0 z-40 items-center justify-center p-4">
+  <div id="editBookingModal" class="modal fixed inset-0 z-40 items-center justify_center p-4">
     <div class="absolute inset-0 bg-black/50" onclick="closeModal('editBookingModal')"></div>
     <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
       <div class="flex items-center justify-between mb-3">
@@ -503,7 +511,7 @@
           <button class="btn-ghost" onclick="locateMe()"><i class="fa-solid fa-location-crosshairs ml-2"></i> استخدام موقعي</button>
           <span id="addrCoords" class="text-xs text-gray-600"></span>
         </div>
-        <div class="flex items-center justify-between">
+        <div class="flex items_center justify-between">
           <div class="flex items-center gap-2">
             <input id="addrDefault" type="checkbox">
             <label for="addrDefault" class="text-sm">تعيين كعنوان افتراضي</label>
@@ -566,6 +574,13 @@
     $('#bookingDate')?.addEventListener('change', renderSlotsForDate);
     $('#userAddressSelect')?.addEventListener('change', async ()=>{ await updateVehicleFromAddress(); await renderSlotsForDate(true); validateConfirm(); });
 
+    // زر الإشعارات
+    $('#btnNotifications')?.addEventListener('click', async () => {
+      showTab('notifications');
+      await loadNotifications();
+    });
+    $('#btnBackFromNotif')?.addEventListener('click', () => showTab('home'));
+
     await bootstrapPublic();
 
     const { data:{ session } } = await supabase.auth.getSession();
@@ -618,16 +633,26 @@
     const { data } = await supabase.from('services').select('id,name_ar,price_egp,duration_min,image_url').eq('active',true).order('name_ar');
     dbServices = data || []; servicesById={}; dbServices.forEach(s=>servicesById[s.id]=s);
     const ph='https://placehold.co/600x400/png?text=Service';
-    const grid=$('#servicesGrid'); if(!grid) return;
-    grid.innerHTML = (dbServices||[]).map(s=>`
-      <button type="button" class="service-item p-0 glass text-right hover:brightness-95 transition overflow-hidden" data-id="${s.id}">
-        <div class="w-full h-28 overflow-hidden bg-indigo-50"><img src="${s.image_url||ph}" class="w-full h-full object-cover" alt="${s.name_ar}"></div>
-        <div class="p-3 flex items-center justify-between">
-          <h4 class="font-semibold">${s.name_ar}</h4>
-          <div class="text-left"><p class="font-bold text-[var(--brand)]">${s.price_egp} ج.م</p><p class="text-xs text-gray-500">${s.duration_min} دقيقة</p></div>
-        </div>
-      </button>`).join('');
-    $$('#servicesGrid .service-item').forEach(btn=>btn.addEventListener('click',()=>toggleService(btn.dataset.id,btn)));
+    const grid=$('#servicesGrid'); if(grid){
+      grid.innerHTML = (dbServices||[]).map(s=>`
+        <button type="button" class="service-item p-0 glass text-right hover:brightness-95 transition overflow-hidden" data-id="${s.id}">
+          <div class="w-full h-28 overflow-hidden bg-indigo-50"><img src="${s.image_url||ph}" class="w-full h-full object-cover" alt="${s.name_ar}"></div>
+          <div class="p-3 flex items-center justify-between">
+            <h4 class="font-semibold">${s.name_ar}</h4>
+            <div class="text-left"><p class="font-bold text-[var(--brand)]">${s.price_egp} ج.م</p><p class="text-xs text-gray-500">${s.duration_min} دقيقة</p></div>
+          </div>
+        </button>`).join('');
+      $$('#servicesGrid .service-item').forEach(btn=>btn.addEventListener('click',()=>toggleService(btn.dataset.id,btn)));
+    }
+    // عروض: نعرض نفس الخدمات كعروض سريعة
+    const offersList = $('#offersList');
+    if (offersList){
+      offersList.innerHTML = (dbServices||[]).map(o=>`
+        <div class="p-4 glass flex items-center justify-between">
+          <div><div class="font-semibold">${o.name_ar}</div><div class="text-xs text-gray-500">${o.duration_min} دقيقة</div></div>
+          <div class="font-bold text-[var(--brand)]">${o.price_egp} ج.م</div>
+        </div>`).join('') || '<p class="text-gray-500">لا توجد عروض حالياً.</p>';
+    }
   }
   function toggleService(id, el){
     const exists=selectedServices.find(x=>x.id===id);
@@ -643,7 +668,7 @@
     if(!box) return;
     if(!selectedServices.length){ box.classList.add('hidden'); if(next) next.disabled=true; return; }
     box.classList.remove('hidden'); if(next) next.disabled=false;
-    list.innerHTML=selectedServices.map(s=>`<div class="flex justify-between items-center p-2 bg-white rounded-xl border"><span>${s.name}</span><span class="text-[var(--brand)] font-medium">${s.price} ج.م</span></div>`).join('');
+    list.innerHTML=selectedServices.map(s=>`<div class="flex justify-between items-center p-2 bg_white rounded-xl border"><span>${s.name}</span><span class="text-[var(--brand)] font-medium">${s.price} ج.م</span></div>`).join('');
     const totalPrice=selectedServices.reduce((a,s)=>a+Number(s.price||0),0), totalDuration=selectedServices.reduce((a,s)=>a+Number(s.duration||0),0);
     $('#totalPrice').textContent=`${totalPrice} ج.م`; $('#totalDuration').textContent=`${totalDuration} دقيقة`;
   }
@@ -677,9 +702,10 @@
 
     $('#authScreen').classList.add('hidden'); $('#mainApp').classList.remove('hidden');
 
-    await Promise.all([loadUserCars(), loadUserAddresses(), loadBookings(), loadTeam()]);
+    await Promise.all([loadUserCars(), loadUserAddresses(), loadBookings(), loadTeam(), loadServices()]);
     await updateVehicleFromAddress(true);
     await renderSlotsForDate();
+    await refreshNotifDot(); // النقطة الحمراء
 
     showTab('home');
 
@@ -695,7 +721,20 @@
   async function deleteCar(id){ if(!confirm('حذف هذه السيارة؟')) return; const { error }=await supabase.from('user_cars').delete().eq('id',id).eq('customer_id', currentUser.id); if(error) return toast('تعذر حذف السيارة (قد تكون مرتبطة بحجوزات)','error'); await loadUserCars(); toast('تم حذف السيارة','success'); }
   function openAddCar(){ $('#addCarBox').classList.remove('hidden'); showTab('profile'); }
   function closeAddCar(){ $('#addCarBox').classList.add('hidden'); }
-  async function saveNewCar(){ if(!currentUser) return; const make=$('#carMakeModel').value.trim(), color=$('#carColor').value.trim(), plate=$('#carPlate').value.trim(); if(!make||!plate) return toast('أدخل النوع ورقم اللوحة','warning'); const { error }=await supabase.from('user_cars').insert({ customer_id: currentUser.id, make_model: make, color, plate_number: plate }); if(error) return toast('تعذر حفظ السيارة','error'); await loadUserCars(); closeAddCar(); $('#carMakeModel').value=''; $('#carColor').value=''; $('#carPlate').value=''; toast('تم إضافة السيارة','success'); validateConfirm(); }
+  async function saveNewCar(){
+    if(!currentUser) return;
+    const make=$('#carMakeModel').value.trim(), color=$('#carColor').value.trim(), plate=$('#carPlate').value.trim();
+    if(!make||!plate) return toast('أدخل النوع ورقم اللوحة','warning');
+    const ins = await supabase.from('user_cars').insert({ customer_id: currentUser.id, make_model: make, color, plate_number: plate }).select().single();
+    if(ins.error){ return toast('تعذر حفظ السيارة','error'); }
+    const newId = ins.data?.id;
+    await loadUserCars();
+    if (newId && $('#userCarSelect')) { $('#userCarSelect').value = String(newId); }
+    closeAddCar();
+    $('#carMakeModel').value=''; $('#carColor').value=''; $('#carPlate').value='';
+    toast('تم إضافة السيارة','success');
+    validateConfirm();
+  }
 
   async function loadUserAddresses(selectId=null){
     if(!currentUser) return;
@@ -816,8 +855,8 @@
 
     if(!userAddresses.length){
       needWrap.classList.remove('hidden');
-      grid.innerHTML='<div class="col-span-full text-center text-orange-600 py-2">أضف عنوانًا أولاً</div>';
-      return;
+      // سنعرض المواعيد الافتراضية حتى بدون عنوان
+      // لا نعيد هنا، لكي نكمل رسم المواعيد
     }
 
     // حتى لو حصل خطأ في تعيين العربية → كمّل وارسم مواعيد افتراضية
@@ -907,7 +946,7 @@
   }
 
   /* ========= Confirm Booking (يتضمن phone_snapshot) ========= */
-  async function confirmBooking(){
+    async function confirmBooking(){
     if($('#confirmBtn').disabled) return;
 
     // 1) تأكد من وجود رقم موبايل
@@ -948,7 +987,11 @@
     const totalDuration=selectedServices.reduce((a,s)=>a+Number(s.duration||0),0);
     const code='B'+Math.random().toString(36).slice(2,8).toUpperCase();
 
-    // 7) الإنشاء مع تضمين phone_snapshot
+    // **التعديل هنا: الحصول على user_car_id**
+    const userCarId = $('#userCarSelect').value;
+    if (!userCarId) return toast('اختر سيارة للحجز','warning'); // تأكد أن المستخدم اختار سيارة
+
+    // 7) الإنشاء مع تضمين phone_snapshot و user_car_id
     const payload={
       customer_id: currentUser.id,
       user_address_id: addr.id,
@@ -964,7 +1007,8 @@
       total_duration_min: totalDuration,
       notes: $('#notes').value.trim() || null,
       booking_code: code,
-      phone_snapshot: phone
+      phone_snapshot: phone,
+      user_car_id: userCarId // **تمت إضافة هذا السطر**
     };
 
     const ins=await supabase.from('bookings').insert(payload).select().single();
@@ -1154,7 +1198,16 @@
   }
 
   /* ========= Tabs ========= */
-  function showTab(tab){ ['home','bookings','booking','profile'].forEach(t=>{ document.getElementById(t+'Tab')?.classList.add('hidden'); $$(`nav [data-tab="${t}"]`).forEach(btn=>btn.classList.remove('bn-active')); }); document.getElementById(tab+'Tab')?.classList.remove('hidden'); $$(`nav [data-tab="${tab}"]`).forEach(btn=>btn.classList.add('bn-active')); if(tab==='bookings'){ if(!currentBookingsFilter) currentBookingsFilter='open'; setBookingsFilter(currentBookingsFilter); } if(tab==='home'){ loadTeam(); } }
+  function showTab(tab){
+    const map = {home:'homeTab', bookings:'bookingsTab', booking:'bookingTab', profile:'profileTab', offers:'offersTab', notifications:'notificationsTab'};
+    Object.values(map).forEach(id=> document.getElementById(id)?.classList.add('hidden'));
+    document.getElementById(map[tab])?.classList.remove('hidden');
+    document.querySelectorAll('nav [data-tab]').forEach(btn=>btn.classList.remove('bn-active'));
+    document.querySelectorAll(`nav [data-tab="${tab}"]`).forEach(btn=>btn.classList.add('bn-active'));
+    if(tab==='bookings'){ if(!currentBookingsFilter) currentBookingsFilter='open'; setBookingsFilter(currentBookingsFilter); }
+    if(tab==='home'){ loadTeam(); }
+    if(tab==='offers'){ /* العرض جاهز عبر loadServices */ }
+  }
 
   /* ========= Team (staff) ========= */
   async function loadTeam(){
@@ -1182,7 +1235,7 @@
         const hasImg = !!(e.avatar_url && String(e.avatar_url).trim());
         const hasEmoji = !!(e.avatar_emoji && String(e.avatar_emoji).trim());
         const avatar = hasImg
-          ? `<img src="${e.avatar_url}" class="w-20 h-20 rounded-full object-cover mx-auto mb-2 border shadow-sm" alt="${name}">`
+          ? `<img src="${e.avatar_url}" class="w-20 h-20 rounded-full object-cover mx_auto mb-2 border shadow-sm" alt="${name}">`
           : hasEmoji
             ? `<div class="w-20 h-20 rounded-full mx-auto mb-2 grid place-items-center border bg-gradient-to-br from-indigo-50 to-amber-50"><div class="text-3xl">${e.avatar_emoji}</div></div>`
             : `<div class="w-20 h-20 rounded-full mx-auto mb-2 grid place-items-center border bg-gradient-to-br from-indigo-50 to-amber-50 text-indigo-500"><i class="fa-solid fa-user-gear text-2xl"></i></div>`;
@@ -1194,10 +1247,123 @@
     }
   }
 
+  /* ========= Notifications ========= */
+  async function refreshNotifDot() {
+    const dot = document.getElementById('notifDot');
+    if (!dot) return;
+    const { count, error } = await supabase.from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_read', false);
+    if (error) { dot.classList.add('hidden'); return; }
+    dot.classList.toggle('hidden', !(count > 0));
+  }
+  async function loadNotifications() {
+    const box = document.getElementById('notificationsList');
+    if (!box) return;
+    const { data, error } = await supabase.from('notifications')
+      .select('*').order('created_at', { ascending: false });
+    if (error) { console.warn(error); return; }
+    box.innerHTML = '';
+    (data || []).forEach(n => {
+      const div = document.createElement('div');
+      div.className = `border rounded-lg p-3 cursor-pointer ${n.is_read ? 'bg-gray-50' : 'bg-white'}`;
+      div.innerHTML = `
+        <div class="font-medium">${n.title}</div>
+        <div class="text-sm text-gray-600">${n.body || ''}</div>
+        <div class="text-xs text-gray-400 mt-1">${new Date(n.created_at).toLocaleString()}</div>
+      `;
+      div.addEventListener('click', async () => {
+        await supabase.from('notifications').update({ is_read: true }).eq('id', n.id);
+        await loadNotifications();
+        await refreshNotifDot();
+      });
+      box.appendChild(div);
+    });
+  }
+
   /* ========= Modal/Toast ========= */
   function openModal(id){ document.getElementById(id)?.classList.add('show'); }
   function closeModal(id){ document.getElementById(id)?.classList.remove('show'); }
   function toast(msg,type='info'){ const host=$('#notifications'); const bg=type==='success'?'bg-green-600':type==='error'?'bg-red-600':type==='warning'?'bg-yellow-600':'bg-slate-800'; const el=document.createElement('div'); el.className=`${bg} text-white px-3 py-2 rounded-lg shadow`; el.textContent=msg; host.appendChild(el); setTimeout(()=>el.remove(),3200); }
-  </script>
+  
+// ======= Hotfixes (minimal, focused) =======
+
+// 1) Stop unexpected navigation when adding a car.
+try{
+  window.openAddCar = (function(orig){
+    return function openAddCar(){
+      const box = document.getElementById('addCarBox');
+      if(box) box.classList.remove('hidden');
+      // لا تغيّر التبويب
+    };
+  })(window.openAddCar);
+}catch{}
+
+// 2) Stronger saveNewCar with clear error handling + select the new car.
+try{
+  window.saveNewCar = (function(orig){
+    return async function saveNewCar(){
+      if(!currentUser) return;
+      const make=document.getElementById('carMakeModel').value.trim(),
+            color=document.getElementById('carColor').value.trim(),
+            plate=document.getElementById('carPlate').value.trim();
+      if(!make||!plate) return toast('أدخل النوع ورقم اللوحة','warning');
+      try{
+        const ins = await supabase
+          .from('user_cars')
+          .insert({ customer_id: currentUser.id, make_model: make, color, plate_number: plate })
+          .select()
+          .single();
+        if(ins.error || !ins.data){ throw ins.error || new Error('no data'); }
+        const newId = ins.data.id;
+        await loadUserCars();
+        const sel = document.getElementById('userCarSelect');
+        if (newId && sel){ sel.value = String(newId); }
+        const box = document.getElementById('addCarBox'); if(box) box.classList.add('hidden');
+        document.getElementById('carMakeModel').value='';
+        document.getElementById('carColor').value='';
+        document.getElementById('carPlate').value='';
+        toast('تم إضافة السيارة','success');
+        validateConfirm();
+      }catch(err){
+        console.error('saveNewCar error', err);
+        toast('تعذر حفظ السيارة. تأكد من الصلاحيات وجرب مرة أخرى','error');
+      }
+    };
+  })(window.saveNewCar);
+}catch{}
+
+// 3) Ensure slots refresh instantly on date selection.
+(function ensureDateAutoRefresh(){
+  const refresh = ()=>{ try{ renderSlotsForDate(); }catch(e){} };
+  const debounced = (fn=>{ let t; return ()=>{ clearTimeout(t); t=setTimeout(fn, 60);} })(refresh);
+
+  function wire(el){
+    if(!el) return;
+    el.addEventListener('input', debounced);
+    el.addEventListener('change', refresh);
+    el.addEventListener('blur', refresh);
+  }
+  document.addEventListener('DOMContentLoaded', ()=>{
+    wire(document.getElementById('bookingDate'));
+    wire(document.getElementById('editDate'));
+  });
+})();
+
+// 4) Prevent unintended tab switches during the booking wizard.
+(function guardTabs(){
+  const original = window.showTab;
+  window.showTab = function(tab){
+    const bookingTab = document.getElementById('bookingTab');
+    const inBooking = bookingTab && !bookingTab.classList.contains('hidden');
+    const s1 = document.getElementById('step1'), s2 = document.getElementById('step2'), s3 = document.getElementById('step3');
+    const wizardActive = inBooking && ( (s1 && !s1.classList.contains('hidden')) || (s2 && !s2.classList.contains('hidden')) || (s3 && !s3.classList.contains('hidden')) );
+    const target = (typeof event!=='undefined') ? event.target : null;
+    const viaNav = target && target.closest && target.closest('nav [data-tab]');
+    if(wizardActive && !viaNav && tab!=='booking'){ return; }
+    return original ? original(tab) : null;
+  };
+})();
+</script>
 </body>
 </html>
