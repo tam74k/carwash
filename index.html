@@ -19,18 +19,19 @@
 
   <style id="theme-core">
     :root{
-      --brand:#5568FE; --brand-2:#8B9BFF; --accent:#FFCF6B;
-      --ink:#0e1330; --surface:#ffffff; --muted:#7b8090;
-      --radius-xl:28px; --bottom-nav-h:72px;
-    }
-    body{
-      font-family:'Cairo',sans-serif;
-      background:
-        radial-gradient(1200px 600px at 90% -10%, #ffe7cc 0%, transparent 55%),
-        radial-gradient(900px 600px at -10% 0%, #e9e6ff 0%, transparent 50%),
-        linear-gradient(180deg,#f6f8ff 0%, #fdfaf7 100%);
-      color:var(--ink); min-height:100vh; position:relative;
-    }
+  --brand:#4036e6; --brand-2:#8B9BFF; --accent:#FFCF6B;
+  --ink:#0e1330; --surface:#ffffff; --muted:#7b8090;
+  --radius-xl:28px; --bottom-nav-h:72px;
+}
+body{
+  font-family:'Cairo',sans-serif;
+  background:
+    radial-gradient(800px 400px at 90% -10%, #FFE7CC 0%, transparent 55%),
+    radial-gradient(600px 400px at -10% 0%, #E9E6FF 0%, transparent 50%),
+    linear-gradient(180deg,#F6F8FF 0%, #FDFBF7 100%);
+  color:var(--ink); min-height:100vh; position:relative;
+}
+
     .bg-orbs:before,.bg-orbs:after{ content:""; position:fixed; z-index:-1; filter:blur(40px); opacity:.65; pointer-events:none; transform:translateZ(0) }
     .bg-orbs:before{ top:-180px; right:-120px; width:520px; height:520px; border-radius:50%;
       background:radial-gradient(closest-side, rgba(85,104,254,.35), transparent 70%) }
@@ -486,7 +487,7 @@
   <!-- إضافة/تعديل عنوان -->
   <div id="addressModal" class="modal fixed inset-0 z-40 items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50" onclick="closeModal('addressModal')"></div>
-    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-xl p-6">
+     <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-xl p-6 pb-safe">
       <div class="flex items-center justify-between mb-3">
         <h3 id="addrModalTitle" class="text-lg font-bold">إضافة عنوان</h3>
         <button class="text-gray-500" onclick="closeModal('addressModal')"><i class="fa-solid fa-xmark"></i></button>
