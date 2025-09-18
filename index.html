@@ -1284,7 +1284,15 @@ body{
 
   /* ========= Modal/Toast ========= */
   function openModal(id){ document.getElementById(id)?.classList.add('show'); }
-  function closeModal(id){ document.getElementById(id)?.classList.remove('show'); }
+  function closeModal(id){
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('show');
+
+  // بعد إغلاق إيصال الحجز، انتقل تلقائيًا للرئيسية
+  if (id === 'receiptModal') {
+    showTab('home');
+  }
+}
   function toast(msg,type='info'){ const host=$('#notifications'); const bg=type==='success'?'bg-green-600':type==='error'?'bg-red-600':type==='warning'?'bg-yellow-600':'bg-slate-800'; const el=document.createElement('div'); el.className=`${bg} text-white px-3 py-2 rounded-lg shadow`; el.textContent=msg; host.appendChild(el); setTimeout(()=>el.remove(),3200); }
   
 // ======= Hotfixes (minimal, focused) =======
