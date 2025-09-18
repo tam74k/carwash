@@ -1249,38 +1249,50 @@ body{
   }
 
   /* ========= Notifications ========= */
-  async function refreshNotifDot() {
-    const dot = document.getElementById('notifDot');
-    if (!dot) return;
-    const { count, error } = await supabase.from('notifications')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_read', false);
-    if (error) { dot.classList.add('hidden'); return; }
-    dot.classList.toggle('hidden', !(count > 0));
-  }
+ async function refreshNotifDot() {
+  const dot = document.getElementById('notifDot');
+  if (!dot || !currentUser?.id) return;
+  const { count, error } = await supabase
+    .from('notifications')
+    .select('*', { count: 'exact', head: true })
+    .eq('customer_id', currentUser.id)   // <-- تقييد بالمستخدم الحالي
+    .eq('is_read', false);
+  if (error) { dot.classList.add('hidden'); return; }
+  dot.classList.toggle('hidden', !(count > 0));
+}
+
   async function loadNotifications() {
-    const box = document.getElementById('notificationsList');
-    if (!box) return;
-    const { data, error } = await supabase.from('notifications')
-      .select('*').order('created_at', { ascending: false });
-    if (error) { console.warn(error); return; }
-    box.innerHTML = '';
-    (data || []).forEach(n => {
-      const div = document.createElement('div');
-      div.className = `border rounded-lg p-3 cursor-pointer ${n.is_read ? 'bg-gray-50' : 'bg-white'}`;
-      div.innerHTML = `
-        <div class="font-medium">${n.title}</div>
-        <div class="text-sm text-gray-600">${n.body || ''}</div>
-        <div class="text-xs text-gray-400 mt-1">${new Date(n.created_at).toLocaleString()}</div>
-      `;
-      div.addEventListener('click', async () => {
-        await supabase.from('notifications').update({ is_read: true }).eq('id', n.id);
-        await loadNotifications();
-        await refreshNotifDot();
-      });
-      box.appendChild(div);
+  const box = document.getElementById('notificationsList');
+  if (!box || !currentUser?.id) return;
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('*')
+    .eq('customer_id', currentUser.id)   // <-- تقييد بالمستخدم الحالي
+    .order('created_at', { ascending: false });
+  if (error) { console.warn(error); return; }
+
+  box.innerHTML = '';
+  (data || []).forEach(n => {
+    const div = document.createElement('div');
+    div.className = `border rounded-lg p-3 cursor-pointer ${n.is_read ? 'bg-gray-50' : 'bg-white'}`;
+    div.innerHTML = `
+      <div class="font-medium">${n.title}</div>
+      <div class="text-sm text-gray-600">${n.body || ''}</div>
+      <div class="text-xs text-gray-400 mt-1">${new Date(n.created_at).toLocaleString()}</div>
+    `;
+    div.addEventListener('click', async () => {
+      await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('id', n.id)
+        .eq('customer_id', currentUser.id);  // <-- تأكيد التقييد عند التحديث
+      await loadNotifications();
+      await refreshNotifDot();
     });
-  }
+    box.appendChild(div);
+  });
+}
+
 
   /* ========= Modal/Toast ========= */
   function openModal(id){ document.getElementById(id)?.classList.add('show'); }
