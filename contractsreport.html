@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>تقرير المشاريع</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: #f3f8ff;
+      margin: 0;
+      padding: 20px;
+      direction: rtl;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 8px 30px rgba(34, 117, 215, 0.25);
+      position: relative;
+      overflow-x: auto;
+    }
+    h2 {
+      color: #2275d7;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    form {
+      text-align: center;
+      margin-bottom: 20px;
+      font-family: 'Cairo', sans-serif;
+    }
+    label {
+      margin: 0 10px;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #333;
+    }
+    input[type="date"] {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1.5px solid #98caff;
+      font-size: 1rem;
+      margin-left: 5px;
+    }
+    button {
+      padding: 10px 22px;
+      background: #2275d7;
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background: #1669b5;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Cairo', sans-serif;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px 8px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    th {
+      background: #2275d7;
+      color: white;
+      font-weight: 700;
+    }
+    .back-home {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      font-size: 1.4rem;
+      color: #2275d7;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-family: 'Cairo', sans-serif;
+      text-decoration: none;
+    }
+    .material-icons {
+      vertical-align: middle;
+    }
+    .error {
+      color: #d93025;
+      margin-top: 15px;
+      font-weight: 600;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="dashboard.html" class="back-home">
+      <span class="material-icons">arrow_back</span> الرئيسية
+    </a>
+    <h2>تقرير المشاريع والعقود</h2>
+    <form id="filterForm">
+      <label for="dateFrom">من:</label>
+      <input type="date" id="dateFrom" required />
+      <label for="dateTo">إلى:</label>
+      <input type="date" id="dateTo" required />
+      <button type="submit">تصفية</button>
+    </form>
+    <p class="error" id="errorMsg"></p>
+    <table id="contractsTable">
+      <thead>
+        <tr>
+          <th>رقم العقد</th>
+          <th>اسم العميل</th>
+          <th>تاريخ العقد</th>
+          <th>حالة العقد</th>
+          <th>مبلغ العقد</th>
+          <th>المدفوع</th>
+          <th>الباقي</th>
+          <th>تكلفة المواد</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- ستُملأ ديناميكياً -->
+      </tbody>
+    </table>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://poeghhpnegpjzaaqknoi.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvZWdoaHBuZWdwanphYXFrbm9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MzE5ODksImV4cCI6MjA3ODIwNzk4OX0.uj24Jb4jcFX6hy_wGuaj0dAt1yoI44DZUlF9e7qPEio';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const form = document.getElementById('filterForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const tbody = document.querySelector('#contractsTable tbody');
+
+    function formatCurrency(value) {
+      return `${value.toFixed(2)} ريال`;
+    }
+
+    form.onsubmit = async function(e) {
+      e.preventDefault();
+      errorMsg.textContent = '';
+      tbody.innerHTML = '';
+
+      const dateFrom = document.getElementById('dateFrom').value;
+      const dateTo = document.getElementById('dateTo').value;
+
+      if(!dateFrom || !dateTo || dateFrom > dateTo) {
+        errorMsg.textContent = 'يجب اختيار تواريخ صحيحة (من أقل أو يساوي إلى)';
+        return;
+      }
+
+      // جلب عقود ضمن الفترة المحددة
+      const { data: contracts, error: contractsError } = await supabaseClient
+        .from('contracts')
+        .select(`
+          id,
+          contract_number,
+          client_name,
+          contract_date,
+          status,
+          total_amount,
+          paid_amount,
+          remaining_amount,
+          contract_materials!inner(cost)
+        `)
+        .gte('contract_date', dateFrom)
+        .lte('contract_date', dateTo);
+
+      if(contractsError) {
+        errorMsg.textContent = 'حدث خطأ أثناء جلب العقود: ' + contractsError.message;
+        return;
+      }
+
+      if (!contracts.length) {
+        tbody.innerHTML = '<tr><td colspan="8">لا توجد عقود في الفترة المحددة</td></tr>';
+        return;
+      }
+
+      contracts.forEach(contract => {
+        // حساب تكلفة المواد للعقد
+        let totalMaterialsCost = 0;
+        if (contract.contract_materials) {
+          contract.contract_materials.forEach(mat => {
+            totalMaterialsCost += mat.cost || 0;
+          });
+        }
+
+        const row = `
+          <tr>
+            <td>${contract.contract_number}</td>
+            <td>${contract.client_name}</td>
+            <td>${contract.contract_date}</td>
+            <td>${contract.status}</td>
+            <td>${formatCurrency(contract.total_amount)}</td>
+            <td>${formatCurrency(contract.paid_amount)}</td>
+            <td>${formatCurrency(contract.remaining_amount)}</td>
+            <td>${formatCurrency(totalMaterialsCost)}</td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+      });
+    };
+
+    // تهيئة حقل التاريخ للتاريخ الحالي كافتراضي
+    window.addEventListener('DOMContentLoaded', () => {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('dateFrom').value = today;
+      document.getElementById('dateTo').value = today;
+    });
+  </script>
+</body>
+</html>

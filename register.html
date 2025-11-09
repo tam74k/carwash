@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>إنشاء حساب جديد</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: #f3f8ff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .register-container {
+      background: #fff;
+      max-width: 400px;
+      width: 90%;
+      padding: 30px 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(34, 117, 215, 0.25);
+      box-sizing: border-box;
+      text-align: center;
+    }
+    h2 {
+      color: #2275d7;
+      margin-bottom: 25px;
+      font-weight: 700;
+      font-size: 1.8rem;
+    }
+    input {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #98caff;
+      font-size: 1rem;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.3s ease;
+      font-family: 'Cairo', sans-serif;
+    }
+    input:focus {
+      border-color: #1669b5;
+    }
+    button {
+      background: #2275d7;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+      width: 100%;
+      font-family: 'Cairo', sans-serif;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background: #1669b5;
+    }
+    a {
+      color: #2275d7;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-block;
+      margin-top: 20px;
+      font-family: 'Cairo', sans-serif;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .error {
+      color: #d93025;
+      font-weight: 600;
+      margin-top: 10px;
+      font-family: 'Cairo', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <h2>إنشاء حساب جديد</h2>
+    <form id="registerForm">
+      <input type="text" id="name" placeholder="اسم الموظف" required autocomplete="name" />
+      <input type="tel" id="mobile" placeholder="رقم الموبايل" required autocomplete="tel" />
+      <input type="email" id="email" placeholder="البريد الإلكتروني" required autocomplete="email" />
+      <input type="password" id="password" placeholder="كلمة المرور" required autocomplete="new-password" />
+      <input type="password" id="confirm" placeholder="تأكيد كلمة المرور" required autocomplete="new-password" />
+      <button type="submit">تسجيل</button>
+    </form>
+    <a href="login.html">لديك حساب بالفعل؟ تسجيل الدخول</a>
+    <p class="error" id="errorMsg"></p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://poeghhpnegpjzaaqknoi.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvZWdoaHBuZWdwanphYXFrbm9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MzE5ODksImV4cCI6MjA3ODIwNzk4OX0.uj24Jb4jcFX6hy_wGuaj0dAt1yoI44DZUlF9e7qPEio';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    document.getElementById('registerForm').onsubmit = async function (e) {
+      e.preventDefault();
+      document.getElementById('errorMsg').textContent = '';
+
+      const name = document.getElementById('name').value.trim();
+      const mobile = document.getElementById('mobile').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm = document.getElementById('confirm').value;
+
+      if (password !== confirm) {
+        document.getElementById('errorMsg').textContent = 'كلمة المرور غير متطابقة';
+        return;
+      }
+
+      const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
+        email,
+        password,
+      });
+
+      if (signUpError) {
+        document.getElementById('errorMsg').textContent = signUpError.message;
+        return;
+      }
+      if (!signUpData.user) {
+        document.getElementById('errorMsg').textContent = 'حدث خطأ في إنشاء المستخدم';
+        return;
+      }
+
+      const { data: insertData, error: insertError } = await supabaseClient
+        .from('employees')
+        .insert([{ id: signUpData.user.id, name, mobile, email }]);
+
+      if (insertError) {
+        document.getElementById('errorMsg').textContent = 'خطأ في حفظ بيانات الموظف: ' + insertError.message;
+        return;
+      }
+
+      alert('تم إنشاء الحساب بنجاح، سيتم تحويلك إلى صفحة تسجيل الدخول');
+      window.location.href = 'login.html';
+    };
+  </script>
+</body>
+</html>

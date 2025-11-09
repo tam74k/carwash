@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>سداد دفعة</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: #f3f8ff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      direction: rtl;
+    }
+    .container {
+      background: white;
+      max-width: 400px;
+      width: 90%;
+      padding: 35px 30px 40px;
+      border-radius: 14px;
+      box-shadow: 0 8px 30px rgba(34, 117, 215, 0.25);
+      box-sizing: border-box;
+      text-align: center;
+      position: relative;
+    }
+    h2 {
+      color: #2275d7;
+      font-size: 1.9rem;
+      margin-bottom: 30px;
+      font-weight: 700;
+    }
+    input {
+      width: 100%;
+      padding: 13px 15px;
+      border-radius: 10px;
+      border: 1.5px solid #98caff;
+      font-size: 1rem;
+      margin: 10px 0;
+      outline: none;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+      font-family: 'Cairo', sans-serif;
+    }
+    input:focus {
+      border-color: #1669b5;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 20px;
+      background-color: #2275d7;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      font-family: 'Cairo', sans-serif;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #1669b5;
+    }
+    .back-home {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      font-size: 1.4rem;
+      color: #2275d7;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      font-family: 'Cairo', sans-serif;
+    }
+    .material-icons {
+      vertical-align: middle;
+    }
+    .error {
+      color: #d93025;
+      margin-top: 15px;
+      font-weight: 600;
+      font-family: 'Cairo', sans-serif;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="dashboard.html" class="back-home">
+      <span class="material-icons">arrow_back</span> الرئيسية
+    </a>
+    <h2>سداد دفعة لعقد</h2>
+    <form id="paymentForm">
+      <input type="text" id="contract_number" placeholder="رقم العقد" required autocomplete="off" />
+      <input type="number" id="amount" placeholder="قيمة الدفعة" required min="0" step="0.01" />
+      <button type="submit">سداد</button>
+    </form>
+    <p class="error" id="errorMsg"></p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://poeghhpnegpjzaaqknoi.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvZWdoaHBuZWdwanphYXFrbm9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MzE5ODksImV4cCI6MjA3ODIwNzk4OX0.uj24Jb4jcFX6hy_wGuaj0dAt1yoI44DZUlF9e7qPEio';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const form = document.getElementById('paymentForm');
+    const errorMsg = document.getElementById('errorMsg');
+
+    form.onsubmit = async function(e) {
+      e.preventDefault();
+      errorMsg.textContent = '';
+
+      const contract_number = document.getElementById('contract_number').value.trim();
+      const amount = parseFloat(document.getElementById('amount').value);
+
+      if (!contract_number || isNaN(amount) || amount <= 0) {
+        errorMsg.textContent = 'يرجى إدخال رقم العقد وقيمة صحيحة للدفعة';
+        return;
+      }
+
+      // بحث عن العقد حسب رقم العقد للحصول على id
+      const { data: contractData, error: contractError } = await supabaseClient
+        .from('contracts')
+        .select('id, remaining_amount, paid_amount')
+        .eq('contract_number', contract_number)
+        .single();
+
+      if (contractError || !contractData) {
+        errorMsg.textContent = 'العقد غير موجود';
+        return;
+      }
+
+      if (amount > contractData.remaining_amount) {
+        errorMsg.textContent = 'قيمة الدفعة أكبر من المبلغ المتبقي';
+        return;
+      }
+
+      // إضافة الدفعة وربطها بالعقد وتحديث مبالغ العقد
+      const { data: paymentData, error: paymentError } = await supabaseClient
+        .from('payments')
+        .insert([{ contract_id: contractData.id, amount, payment_date: new Date().toISOString().split('T')[0] }]);
+
+      if (paymentError) {
+        errorMsg.textContent = 'خطأ في تسجيل الدفعة: ' + paymentError.message;
+        return;
+      }
+
+      // تحديث المدفوع والمبلغ المتبقي في العقد
+      const newPaid = contractData.paid_amount + amount;
+      const newRemaining = contractData.remaining_amount - amount;
+
+      const { error: updateError } = await supabaseClient
+        .from('contracts')
+        .update({ paid_amount: newPaid, remaining_amount: newRemaining })
+        .eq('id', contractData.id);
+
+      if (updateError) {
+        errorMsg.textContent = 'خطأ في تحديث عقد المشروع: ' + updateError.message;
+        return;
+      }
+
+      alert('تم سداد الدفعة بنجاح');
+      window.location.href = 'dashboard.html';
+    };
+  </script>
+</body>
+</html>

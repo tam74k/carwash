@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>لوحة التحكم - شركتك</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Cairo', sans-serif;
+      background: #f3f8ff;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      color: #333;
+      direction: rtl;
+    }
+    /* القائمة الجانبية */
+    nav.sidebar {
+      width: 230px;
+      background: #2275d7;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding-top: 30px;
+      flex-shrink: 0;
+    }
+    nav.sidebar h2 {
+      margin: 0 20px 25px;
+      font-weight: 700;
+    }
+    nav.sidebar a {
+      padding: 15px 20px;
+      text-decoration: none;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      border-left: 4px solid transparent;
+      transition: background-color 0.3s, border-left-color 0.3s;
+    }
+    nav.sidebar a:hover, nav.sidebar a.active {
+      background: #1669b5;
+      border-left-color: #fff;
+    }
+    /* محتوى الصفحة */
+    main.content {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 30px;
+      overflow-y: auto;
+    }
+    /* الرأس */
+    header.topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    header.topbar .brand {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: #2275d7;
+    }
+    header.topbar .user {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #555;
+    }
+    /* مربعات الملخص */
+    section.summary {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    section.summary .card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      flex: 1 1 220px;
+      box-shadow: 0 4px 12px rgba(34, 117, 215, 0.15);
+      color: #2275d7;
+      font-weight: 700;
+      font-size: 1.2rem;
+      text-align: center;
+      user-select: none;
+    }
+    /* فلتر التواريخ */
+    .date-filter {
+      margin-top: 15px;
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .date-filter label {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #444;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Cairo', sans-serif;
+    }
+    .date-filter input[type="date"] {
+      margin-top: 5px;
+      padding: 6px 10px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #98caff;
+      outline: none;
+      font-family: 'Cairo', sans-serif;
+    }
+    .date-filter button {
+      background: #2275d7;
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Cairo', sans-serif;
+      transition: background-color 0.3s;
+      margin-top: 22px;
+    }
+    .date-filter button:hover {
+      background: #1669b5;
+    }
+    /* قسم الرسم البياني */
+    section.chart-container {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 12px rgba(34, 117, 215, 0.15);
+      flex-grow: 1;
+    }
+  </style>
+
+  <!-- مكتبة supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- مكتبة رسم بياني (مثل Chart.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <nav class="sidebar">
+    <h2>شركة الألمنيوم</h2>
+    <a href="dashboard.html" class="active">الرئيسية</a>
+    <a href="contract.html">تسجيل عقد جديد</a>
+    <a href="payment.html">سداد دفعة</a>
+    <a href="material.html">إضافة مادة</a>
+    <a href="report.html">تقرير عقد</a>
+    <a href="contractsreport.html">تقرير المشاريع</a>
+    <a href="changepassword.html">تغيير كلمة المرور</a>
+    <a href="login.html" onclick="supabase.auth.signOut()">خروج</a>
+  </nav>
+
+  <main class="content">
+    <header class="topbar">
+      <div class="brand">شركة الألمنيوم</div>
+      <div class="user" id="userName">مرحبا، ...</div>
+    </header>
+
+    <section class="summary">
+      <div class="card">
+        <div>عدد العقود</div>
+        <div id="contractsCount">0</div>
+      </div>
+      <div class="card">
+        <div>المبالغ المحصلة هذا الشهر</div>
+        <div id="collectedAmount">0 ريال</div>
+      </div>
+      <div class="card">
+        <div>إجمالي الدفعات</div>
+        <div id="totalPayments">0 ريال</div>
+      </div>
+      <div class="card">
+        <div>إجمالي المواد المستخدمة</div>
+        <div id="totalMaterialsCost">0 ريال</div>
+      </div>
+    </section>
+
+    <section class="date-filter">
+      <label>من:
+        <input type="date" id="dateFrom" />
+      </label>
+      <label>إلى:
+        <input type="date" id="dateTo" />
+      </label>
+      <button onclick="filterData()">تصفية</button>
+    </section>
+
+    <section class="chart-container">
+      <canvas id="summaryChart"></canvas>
+    </section>
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://poeghhpnegpjzaaqknoi.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvZWdoaHBuZWdwanphYXFrbm9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MzE5ODksImV4cCI6MjA3ODIwNzk4OX0.uj24Jb4jcFX6hy_wGuaj0dAt1yoI44DZUlF9e7qPEio';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // عرض اسم المستخدم في الهيدر
+    async function showUser() {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if(user) {
+        document.getElementById('userName').textContent = `مرحبا، ${user.email}`;
+      } else {
+        window.location.href = "login.html";
+      }
+    }
+
+    // إعداد تواريخ الفلترة افتراضياً (الشهر الحالي)
+    function setDefaultDates() {
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0,10);
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0,10);
+      document.getElementById('dateFrom').value = firstDay;
+      document.getElementById('dateTo').value = lastDay;
+    }
+
+    // جلب وتحديث بيانات الملخص
+    async function loadSummary(from, to) {
+      // مثال استعلامات يمكن تعديلها حسب بنية قاعدة البيانات الخاصة بك
+      const { data: contracts, error: contractsError } = await supabaseClient
+        .from('contracts')
+        .select('id')
+        .gte('contract_date', from)
+        .lte('contract_date', to);
+
+      const { data: payments, error: paymentsError } = await supabaseClient
+        .from('payments')
+        .select('amount')
+        .gte('payment_date', from)
+        .lte('payment_date', to);
+
+      const { data: materials, error: materialsError } = await supabaseClient
+        .from('contract_materials')
+        .select('cost')
+        .gte('purchase_date', from)
+        .lte('purchase_date', to);
+
+      if(contractsError || paymentsError || materialsError) {
+        alert('خطأ عند جلب البيانات');
+        return;
+      }
+
+      const contractsCount = contracts?.length || 0;
+      const totalPayments = payments?.reduce((sum,p) => sum + (p.amount || 0), 0) || 0;
+      const totalMaterialsCost = materials?.reduce((sum,m) => sum + (m.cost || 0), 0) || 0;
+      // مبالغ محصلة هذا الشهر = المدفوعات (يمكن تعديل حسب تعريف المبالغ المحصلة)
+      const collectedAmount = totalPayments;
+
+      document.getElementById('contractsCount').textContent = contractsCount;
+      document.getElementById('totalPayments').textContent = totalPayments.toFixed(2) + ' ريال';
+      document.getElementById('totalMaterialsCost').textContent = totalMaterialsCost.toFixed(2) + ' ريال';
+      document.getElementById('collectedAmount').textContent = collectedAmount.toFixed(2) + ' ريال';
+
+      updateChart(contractsCount, collectedAmount, totalPayments, totalMaterialsCost);
+    }
+
+    // رسم بياني باستخدام Chart.js
+    let chartInstance = null;
+    function updateChart(contractsCount, collectedAmount, totalPayments, totalMaterialsCost) {
+      const ctx = document.getElementById('summaryChart').getContext('2d');
+      if(chartInstance) chartInstance.destroy();
+
+      chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['عدد العقود', 'المبالغ المحصلة', 'اجمالي الدفعات', 'تكلفة المواد'],
+          datasets: [{
+            label: 'ملخص البيانات',
+            backgroundColor: ['#2275d7', '#1669b5', '#5090e9', '#90b9f7'],
+            data: [contractsCount, collectedAmount, totalPayments, totalMaterialsCost]
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
+
+    // زر تصفية البيانات
+    function filterData() {
+      const from = document.getElementById('dateFrom').value;
+      const to = document.getElementById('dateTo').value;
+      if(!from || !to) {
+        alert('يرجى تحديد التاريخين');
+        return;
+      }
+      loadSummary(from, to);
+    }
+
+    // تهيئة الصفحة
+    window.onload = () => {
+      showUser();
+      setDefaultDates();
+      const from = document.getElementById('dateFrom').value;
+      const to = document.getElementById('dateTo').value;
+      loadSummary(from, to);
+    };
+  </script>
+</body>
+</html>
