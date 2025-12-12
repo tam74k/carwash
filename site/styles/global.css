@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap'); /* Example font */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6;
+    color: var(--color-text-dark);
+    background-color: var(--color-background-light);
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    max-width: 600px; /* Typical mobile width constraint */
+    margin: 0 auto;
+    background-color: var(--color-background-light);
+    box-shadow: 0 0 20px var(--color-shadow-light);
+    position: relative;
+    overflow: hidden; /* For page transitions */
+}
+
+main {
+    flex: 1;
+    padding: var(--spacing-md);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    transition: opacity var(--transition-speed), transform var(--transition-speed);
+}
+
+.page-enter {
+    opacity: 0;
+    transform: translateX(100%);
+}
+
+.page-enter-active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.page-exit {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.page-exit-active {
+    opacity: 0;
+    transform: translateX(-100%);
+    position: absolute; /* Prevent content reflow during exit */
+    width: 100%;
+}
+
+/* RTL adjustments */
+html[dir="rtl"] .app-container {
+    direction: rtl;
+}
+
+html[dir="rtl"] .page-enter {
+    transform: translateX(-100%);
+}
+
+html[dir="rtl"] .page-exit-active {
+    transform: translateX(100%);
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-md);
+    transition: background-color var(--transition-speed), transform 0.1s ease-out;
+    background-color: var(--color-primary-gold);
+    color: var(--color-text-light);
+    box-shadow: 0 2px 5px var(--color-shadow-light);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="date"],
+input[type="time"],
+textarea,
+select {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-md);
+    background-color: var(--color-card-background);
+    color: var(--color-text-dark);
+    transition: border-color var(--transition-speed);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--color-primary-gold);
+    box-shadow: 0 0 0 2px rgba(var(--color-primary-gold), 0.2);
+}
+
+a {
+    color: var(--color-primary-gold);
+    text-decoration: none;
+    transition: color var(--transition-speed);
+}
+
+a:hover {
+    color: darken(var(--color-primary-gold), 10%); /* This would need JS or Sass variable for true darken */
+}
+
+/* Utility classes for spacing */
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mb-sm { margin-bottom: var(--spacing-sm); }
+.mb-md { margin-bottom: var(--spacing-md); }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.text-center { text-align: center; }
+
+/* Elevated Card Style */
+.card {
+    background-color: var(--color-card-background);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    box-shadow: 0 4px 10px var(--color-shadow-light);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+}

@@ -1,0 +1,73 @@
+/* pages/CarsPage/CarsPage.css */
+.cars-page {
+    padding-bottom: var(--spacing-lg);
+}
+
+.page-title {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-text-dark);
+}
+
+#cars-list {
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+.car-item {
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-md);
+}
+
+.car-item .card-title {
+    color: var(--color-primary-gold);
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-sm);
+}
+
+.car-item p {
+    margin-bottom: var(--spacing-xs);
+}
+
+.car-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+}
+
+.car-actions .app-button {
+    flex: 1;
+}
+
+#car-form {
+    padding: var(--spacing-md);
+}
+
+#car-form label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    font-weight: 500;
+    color: var(--color-text-dark);
+}
+
+#car-form input {
+    margin-bottom: var(--spacing-md);
+}
+
+#car-form-buttons {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+/* For ms-sm, we can use margin-inline-start to support RTL */
+html[dir="ltr"] .ms-sm { margin-left: var(--spacing-sm); }
+html[dir="rtl"] .ms-sm { margin-right: var(--spacing-sm); }
+
+/* RTL Adjustments */
+html[dir="rtl"] .car-item {
+    text-align: right;
+}
+html[dir="rtl"] .car-actions {
+    flex-direction: row-reverse; /* Reverse button order if desired */
+}

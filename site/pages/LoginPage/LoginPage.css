@@ -1,0 +1,46 @@
+/* pages/LoginPage/LoginPage.css */
+.login-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - var(--header-height) - var(--navbar-height)); /* Adjust based on actual header/navbar height */
+    padding: var(--spacing-md);
+}
+
+.page-title {
+    color: var(--color-text-dark);
+    margin-bottom: var(--spacing-xl);
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+}
+
+.auth-form {
+    width: 100%;
+    max-width: 400px;
+    padding: var(--spacing-lg);
+}
+
+.auth-form label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    font-weight: 500;
+    color: var(--color-text-dark);
+}
+
+.auth-form input {
+    margin-bottom: var(--spacing-md);
+}
+
+.error-message {
+    color: #e74c3c; /* Red for error messages */
+    text-align: center;
+    margin-top: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.forgot-password {
+    display: block;
+    margin-top: var(--spacing-md);
+    font-size: var(--font-size-sm);
+}

@@ -1,0 +1,81 @@
+/* pages/HomePage/HomePage.css */
+.home-page {
+    padding-bottom: var(--spacing-lg); /* Ensure space for bottom nav bar */
+}
+
+.home-welcome {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-text-dark);
+}
+
+.hero-section {
+    position: relative;
+    overflow: hidden;
+    padding: 0; /* Card already has padding, customize as needed */
+    border-radius: var(--border-radius-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.hero-image {
+    width: 100%;
+    height: 180px; /* Fixed height for hero image */
+    object-fit: cover;
+    display: block;
+    border-radius: var(--border-radius-lg);
+}
+
+.hero-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0)); /* Gradient overlay */
+    padding: var(--spacing-md);
+    color: var(--color-text-light);
+    border-bottom-left-radius: var(--border-radius-lg);
+    border-bottom-right-radius: var(--border-radius-lg);
+}
+
+.hero-prompt {
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-primary-gold);
+}
+
+.section-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    color: var(--color-text-dark);
+}
+
+#offers-section {
+    display: grid;
+    gap: var(--spacing-md);
+    grid-template-columns: 1fr; /* Single column for mobile */
+}
+
+.offer-card {
+    padding: var(--spacing-md);
+}
+
+.offer-card .card-title {
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-primary-gold);
+}
+
+/* RTL Adjustments */
+html[dir="rtl"] .home-welcome {
+    text-align: right;
+}
+html[dir="rtl"] .hero-content {
+    text-align: right;
+}
+html[dir="rtl"] .section-title {
+    text-align: right;
+}
