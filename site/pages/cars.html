@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>My Cars - Premium Car Wash</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../styles/variables.css">
+    <link rel="stylesheet" href="../styles/reset.css">
+    <link rel="stylesheet" href="../styles/components.css">
+
+    <style>
+        .page-header {
+            background: var(--color-white);
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--color-gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: var(--z-sticky);
+        }
+
+        .page-title {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+        }
+
+        .page-content {
+            padding: var(--space-lg);
+            padding-bottom: calc(var(--bottom-nav-height) + var(--space-lg));
+        }
+
+        .car-card {
+            background: var(--color-white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-md);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .car-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-white);
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .car-info {
+            flex: 1;
+        }
+
+        .car-model {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-black);
+            margin-bottom: var(--space-xs);
+        }
+
+        .car-plate {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-600);
+        }
+
+        .car-actions {
+            display: flex;
+            gap: var(--space-sm);
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-gray-100);
+            color: var(--color-gray-700);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .icon-btn:hover {
+            background: var(--color-gray-200);
+        }
+
+        .icon-btn.delete {
+            color: var(--color-error);
+        }
+
+        .fab {
+            position: fixed;
+            bottom: calc(var(--bottom-nav-height) + var(--space-lg));
+            right: var(--space-lg);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            box-shadow: var(--shadow-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-white);
+            font-size: 24px;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            z-index: var(--z-fixed);
+        }
+
+        html[dir="rtl"] .fab {
+            right: auto;
+            left: var(--space-lg);
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+    </style>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title" data-i18n="cars.title">My Cars</h1>
+    </div>
+
+    <!-- Content -->
+    <div class="page-content" id="carsContainer">
+        <!-- Cars will be loaded here -->
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" onclick="openAddCarModal()">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-item" onclick="location.href='home.html'">
+            <i class="fas fa-home bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.home">Home</span>
+        </div>
+        <div class="bottom-nav-item" onclick="location.href='booking.html'">
+            <i class="fas fa-calendar-plus bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.book">Book</span>
+        </div>
+        <div class="bottom-nav-item" onclick="location.href='orders.html'">
+            <i class="fas fa-list bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.orders">Orders</span>
+        </div>
+        <div class="bottom-nav-item active" onclick="location.href='settings.html'">
+            <i class="fas fa-user bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.profile">Profile</span>
+        </div>
+    </nav>
+
+    <!-- Add/Edit Car Modal -->
+    <div id="carModal" class="modal-overlay hidden" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle" data-i18n="cars.addCar">Add Car</h2>
+                <button class="modal-close" onclick="closeCarModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="carForm">
+                    <input type="hidden" id="carId">
+                    <div class="input-group">
+                        <input type="text" id="brandModel" class="input" placeholder=" " required>
+                        <label class="input-label" for="brandModel" data-i18n="cars.brandModel">Brand & Model</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="licensePlate" class="input" placeholder=" " required>
+                        <label class="input-label" for="licensePlate" data-i18n="cars.licensePlate">License
+                            Plate</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeCarModal()" data-i18n="common.cancel">Cancel</button>
+                <button class="btn btn-primary" onclick="saveCar()" id="saveBtn" data-i18n="common.save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader" class="loader-overlay hidden">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../utils/i18n.js"></script>
+    <script src="../utils/supabase.js"></script>
+
+    <script>
+        let currentUser = null;
+        let cars = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            showLoader();
+
+            // Wait for i18n to be ready
+            await i18n.ready();
+
+            currentUser = await getCurrentUser();
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+            await loadCars();
+            hideLoader();
+        });
+
+        async function loadCars() {
+            try {
+                cars = await getUserCars(currentUser.id);
+                renderCars();
+            } catch (error) {
+                console.error('Error loading cars:', error);
+            }
+        }
+
+        function renderCars() {
+            const container = document.getElementById('carsContainer');
+
+            if (cars.length === 0) {
+                container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon"><i class="fas fa-car"></i></div>
+            <div class="empty-state-title" data-i18n="cars.noCars">No cars added yet</div>
+            <div class="empty-state-description" data-i18n="cars.addFirst">Add your first car</div>
+            <button class="btn btn-primary" onclick="openAddCarModal()">
+              <i class="fas fa-plus"></i>
+              <span data-i18n="cars.addCar">Add Car</span>
+            </button>
+          </div>
+        `;
+                i18n.updatePageText();
+                return;
+            }
+
+            container.innerHTML = cars.map(car => `
+        <div class="car-card">
+          <div class="car-icon">
+            <i class="fas fa-car"></i>
+          </div>
+          <div class="car-info">
+            <div class="car-model">${car.brand_model}</div>
+            <div class="car-plate">${car.license_plate}</div>
+          </div>
+          <div class="car-actions">
+            <button class="icon-btn" onclick="editCar('${car.id}')">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="icon-btn delete" onclick="confirmDeleteCar('${car.id}')">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+        }
+
+        function openAddCarModal() {
+            document.getElementById('carId').value = '';
+            document.getElementById('brandModel').value = '';
+            document.getElementById('licensePlate').value = '';
+            document.getElementById('modalTitle').setAttribute('data-i18n', 'cars.addCar');
+            i18n.updatePageText();
+            document.getElementById('carModal').classList.remove('hidden');
+        }
+
+        function editCar(carId) {
+            const car = cars.find(c => c.id === carId);
+            if (!car) return;
+
+            document.getElementById('carId').value = car.id;
+            document.getElementById('brandModel').value = car.brand_model;
+            document.getElementById('licensePlate').value = car.license_plate;
+            document.getElementById('modalTitle').setAttribute('data-i18n', 'cars.editCar');
+            i18n.updatePageText();
+            document.getElementById('carModal').classList.remove('hidden');
+        }
+
+        function closeCarModal() {
+            document.getElementById('carModal').classList.add('hidden');
+        }
+
+        function closeModal(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                closeCarModal();
+            }
+        }
+
+        async function saveCar() {
+            const carId = document.getElementById('carId').value;
+            const brandModel = document.getElementById('brandModel').value;
+            const licensePlate = document.getElementById('licensePlate').value;
+
+            if (!brandModel || !licensePlate) return;
+
+            showLoader();
+
+            try {
+                const result = carId
+                    ? await updateCar(carId, brandModel, licensePlate)
+                    : await addCar(currentUser.id, brandModel, licensePlate);
+
+                if (result.success) {
+                    closeCarModal();
+                    await loadCars();
+                } else {
+                    alert(result.error);
+                }
+            } catch (error) {
+                console.error('Error saving car:', error);
+                alert('An error occurred');
+            }
+
+            hideLoader();
+        }
+
+        async function confirmDeleteCar(carId) {
+            if (!confirm(i18n.t('cars.deleteConfirm'))) return;
+
+            showLoader();
+
+            try {
+                const result = await deleteCar(carId);
+                if (result.success) {
+                    await loadCars();
+                } else {
+                    alert(result.error);
+                }
+            } catch (error) {
+                console.error('Error deleting car:', error);
+                alert('An error occurred');
+            }
+
+            hideLoader();
+        }
+
+        function showLoader() {
+            document.getElementById('loader').classList.remove('hidden');
+        }
+
+        function hideLoader() {
+            document.getElementById('loader').classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>

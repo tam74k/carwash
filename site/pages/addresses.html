@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>My Addresses - Premium Car Wash</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../styles/variables.css">
+    <link rel="stylesheet" href="../styles/reset.css">
+    <link rel="stylesheet" href="../styles/components.css">
+
+    <style>
+        .page-header {
+            background: var(--color-white);
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--color-gray-200);
+            position: sticky;
+            top: 0;
+            z-index: var(--z-sticky);
+        }
+
+        .page-title {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+        }
+
+        .page-content {
+            padding: var(--space-lg);
+            padding-bottom: calc(var(--bottom-nav-height) + var(--space-lg));
+        }
+
+        .address-card {
+            background: var(--color-white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-md);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            gap: var(--space-md);
+        }
+
+        .address-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-white);
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .address-info {
+            flex: 1;
+        }
+
+        .address-label {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-black);
+            margin-bottom: var(--space-xs);
+        }
+
+        .address-details {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-600);
+            line-height: 1.6;
+        }
+
+        .address-actions {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-gray-100);
+            color: var(--color-gray-700);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .icon-btn:hover {
+            background: var(--color-gray-200);
+        }
+
+        .icon-btn.delete {
+            color: var(--color-error);
+        }
+
+        .fab {
+            position: fixed;
+            bottom: calc(var(--bottom-nav-height) + var(--space-lg));
+            right: var(--space-lg);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            box-shadow: var(--shadow-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-white);
+            font-size: 24px;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            z-index: var(--z-fixed);
+        }
+
+        html[dir="rtl"] .fab {
+            right: auto;
+            left: var(--space-lg);
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        #map {
+            height: 300px;
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-md);
+            z-index: 1;
+        }
+
+        .map-info {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-600);
+            margin-bottom: var(--space-md);
+            text-align: center;
+        }
+    </style>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title" data-i18n="addresses.title">My Addresses</h1>
+    </div>
+
+    <!-- Content -->
+    <div class="page-content" id="addressesContainer">
+        <!-- Addresses will be loaded here -->
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" onclick="openAddAddressModal()">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-item" onclick="location.href='home.html'">
+            <i class="fas fa-home bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.home">Home</span>
+        </div>
+        <div class="bottom-nav-item" onclick="location.href='booking.html'">
+            <i class="fas fa-calendar-plus bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.book">Book</span>
+        </div>
+        <div class="bottom-nav-item" onclick="location.href='orders.html'">
+            <i class="fas fa-list bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.orders">Orders</span>
+        </div>
+        <div class="bottom-nav-item active" onclick="location.href='settings.html'">
+            <i class="fas fa-user bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.profile">Profile</span>
+        </div>
+    </nav>
+
+    <!-- Add/Edit Address Modal -->
+    <div id="addressModal" class="modal-overlay hidden" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle" data-i18n="addresses.addAddress">Add Address</h2>
+                <button class="modal-close" onclick="closeAddressModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addressForm">
+                    <input type="hidden" id="addressId">
+                    <input type="hidden" id="latitude">
+                    <input type="hidden" id="longitude">
+
+                    <div class="input-group">
+                        <input type="text" id="label" class="input" placeholder=" " required>
+                        <label class="input-label" for="label" data-i18n="addresses.label">Label</label>
+                    </div>
+
+                    <div class="map-info">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span data-i18n="addresses.clickMap">Click on the map to set location</span>
+                    </div>
+                    <div id="map"></div>
+
+                    <div class="input-group">
+                        <input type="text" id="street" class="input" placeholder=" " required>
+                        <label class="input-label" for="street" data-i18n="addresses.street">Street Address</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="city" class="input" placeholder=" " required>
+                        <label class="input-label" for="city" data-i18n="addresses.city">City</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="zipCode" class="input" placeholder=" ">
+                        <label class="input-label" for="zipCode" data-i18n="addresses.zipCode">ZIP Code</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeAddressModal()" data-i18n="common.cancel">Cancel</button>
+                <button class="btn btn-primary" onclick="saveAddress()" data-i18n="common.save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader" class="loader-overlay hidden">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../utils/i18n.js"></script>
+    <script src="../utils/supabase.js"></script>
+
+    <script>
+        let currentUser = null;
+        let addresses = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            showLoader();
+
+            // Wait for i18n to be ready
+            await i18n.ready();
+
+            currentUser = await getCurrentUser();
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+            await loadAddresses();
+            hideLoader();
+        });
+
+        async function loadAddresses() {
+            try {
+                addresses = await getUserAddresses(currentUser.id);
+                renderAddresses();
+            } catch (error) {
+                console.error('Error loading addresses:', error);
+            }
+        }
+
+        function renderAddresses() {
+            const container = document.getElementById('addressesContainer');
+
+            if (addresses.length === 0) {
+                container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div class="empty-state-title" data-i18n="addresses.noAddresses">No addresses saved yet</div>
+            <div class="empty-state-description" data-i18n="addresses.addFirst">Add your first address</div>
+            <button class="btn btn-primary" onclick="openAddAddressModal()">
+              <i class="fas fa-plus"></i>
+              <span data-i18n="addresses.addAddress">Add Address</span>
+            </button>
+          </div>
+        `;
+                i18n.updatePageText();
+                return;
+            }
+
+            container.innerHTML = addresses.map(address => `
+        <div class="address-card">
+          <div class="address-icon">
+            <i class="fas fa-map-marker-alt"></i>
+          </div>
+          <div class="address-info">
+            <div class="address-label">${address.label}</div>
+            <div class="address-details">
+              ${address.street}<br>
+              ${address.city}${address.zip_code ? ', ' + address.zip_code : ''}
+            </div>
+          </div>
+          <div class="address-actions">
+            <button class="icon-btn" onclick="editAddress('${address.id}')">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="icon-btn delete" onclick="confirmDeleteAddress('${address.id}')">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+        }
+
+        function openAddAddressModal() {
+            document.getElementById('addressId').value = '';
+            document.getElementById('label').value = '';
+            document.getElementById('street').value = '';
+            document.getElementById('city').value = '';
+            document.getElementById('zipCode').value = '';
+            document.getElementById('latitude').value = '';
+            document.getElementById('longitude').value = '';
+            document.getElementById('modalTitle').setAttribute('data-i18n', 'addresses.addAddress');
+            i18n.updatePageText();
+            document.getElementById('addressModal').classList.remove('hidden');
+
+            setTimeout(() => {
+                initMap();
+                if (map) {
+                    map.invalidateSize();
+                    if (marker) {
+                        map.removeLayer(marker);
+                        marker = null;
+                    }
+                }
+            }, 100);
+        }
+
+        function editAddress(addressId) {
+            const address = addresses.find(a => a.id === addressId);
+            if (!address) return;
+
+            document.getElementById('addressId').value = address.id;
+            document.getElementById('label').value = address.label;
+            document.getElementById('street').value = address.street;
+            document.getElementById('city').value = address.city;
+            document.getElementById('zipCode').value = address.zip_code || '';
+            document.getElementById('latitude').value = address.latitude || '';
+            document.getElementById('longitude').value = address.longitude || '';
+            document.getElementById('modalTitle').setAttribute('data-i18n', 'addresses.editAddress');
+            i18n.updatePageText();
+            document.getElementById('addressModal').classList.remove('hidden');
+
+            setTimeout(() => {
+                initMap();
+                if (map) {
+                    map.invalidateSize();
+
+                    if (address.latitude && address.longitude) {
+                        const lat = parseFloat(address.latitude);
+                        const lng = parseFloat(address.longitude);
+
+                        if (marker) map.removeLayer(marker);
+                        marker = L.marker([lat, lng]).addTo(map);
+                        map.setView([lat, lng], 15);
+                    }
+                }
+            }, 100);
+        }
+
+        function closeAddressModal() {
+            document.getElementById('addressModal').classList.add('hidden');
+        }
+
+        function closeModal(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                closeAddressModal();
+            }
+        }
+
+        async function saveAddress() {
+            const addressId = document.getElementById('addressId').value;
+            const label = document.getElementById('label').value;
+            const street = document.getElementById('street').value;
+            const city = document.getElementById('city').value;
+            const zipCode = document.getElementById('zipCode').value;
+            const latitude = document.getElementById('latitude').value;
+            const longitude = document.getElementById('longitude').value;
+
+            if (!label || !street || !city) {
+                alert(i18n.t('common.fillRequired') || 'Please fill required fields');
+                return;
+            }
+
+            showLoader();
+
+            try {
+                const result = addressId
+                    ? await updateAddress(addressId, label, street, city, zipCode, latitude, longitude)
+                    : await addAddress(currentUser.id, label, street, city, zipCode, latitude, longitude);
+
+                if (result.success) {
+                    closeAddressModal();
+                    await loadAddresses();
+                } else {
+                    alert(result.error);
+                }
+            } catch (error) {
+                console.error('Error saving address:', error);
+                alert('An error occurred');
+            }
+
+            hideLoader();
+        }
+
+        async function confirmDeleteAddress(addressId) {
+            if (!confirm(i18n.t('addresses.deleteConfirm'))) return;
+
+            showLoader();
+
+            try {
+                const result = await deleteAddress(addressId);
+                if (result.success) {
+                    await loadAddresses();
+                } else {
+                    alert(result.error);
+                }
+            } catch (error) {
+                console.error('Error deleting address:', error);
+                alert('An error occurred');
+            }
+
+            hideLoader();
+        }
+
+        function showLoader() {
+            document.getElementById('loader').classList.remove('hidden');
+        }
+
+        function hideLoader() {
+            document.getElementById('loader').classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#000000">
+  <title data-i18n="auth.login">Login - Premium Car Wash</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../styles/variables.css">
+  <link rel="stylesheet" href="../styles/reset.css">
+  <link rel="stylesheet" href="../styles/components.css">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, var(--color-gray-50) 0%, var(--color-gray-100) 100%);
+    }
+
+    .auth-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-lg);
+    }
+
+    .auth-card {
+      background: var(--color-white);
+      border-radius: var(--radius-2xl);
+      padding: var(--space-2xl);
+      max-width: 400px;
+      width: 100%;
+      box-shadow: var(--shadow-xl);
+      animation: fadeInUp 0.5s ease;
+    }
+
+    .auth-logo {
+      text-align: center;
+      margin-bottom: var(--space-xl);
+    }
+
+    .logo-wrapper {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto var(--space-md);
+      background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-gold);
+    }
+
+    .logo-icon {
+      font-size: 40px;
+      color: var(--color-white);
+    }
+
+    .auth-title {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      text-align: center;
+      margin-bottom: var(--space-sm);
+      color: var(--color-black);
+    }
+
+    .auth-subtitle {
+      font-size: var(--font-size-sm);
+      text-align: center;
+      color: var(--color-gray-600);
+      margin-bottom: var(--space-xl);
+    }
+
+    .auth-form {
+      margin-bottom: var(--space-lg);
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+    }
+
+    .checkbox {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--color-gold);
+      cursor: pointer;
+    }
+
+    .checkbox-label {
+      font-size: var(--font-size-sm);
+      color: var(--color-gray-700);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .forgot-password {
+      text-align: center;
+      margin-top: var(--space-md);
+    }
+
+    .forgot-password-link {
+      font-size: var(--font-size-sm);
+      color: var(--color-gold);
+      font-weight: var(--font-weight-medium);
+      transition: all var(--transition-base);
+    }
+
+    .forgot-password-link:hover {
+      color: var(--color-gold-dark);
+      text-decoration: underline;
+    }
+
+    .auth-divider {
+      text-align: center;
+      margin: var(--space-xl) 0;
+      position: relative;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 45%;
+      height: 1px;
+      background: var(--color-gray-200);
+    }
+
+    .auth-divider::before {
+      left: 0;
+    }
+
+    .auth-divider::after {
+      right: 0;
+    }
+
+    .divider-text {
+      padding: 0 var(--space-md);
+      background: var(--color-white);
+      color: var(--color-gray-500);
+      font-size: var(--font-size-sm);
+    }
+
+    .auth-footer {
+      text-align: center;
+      font-size: var(--font-size-sm);
+      color: var(--color-gray-600);
+    }
+
+    .auth-footer-link {
+      color: var(--color-gold);
+      font-weight: var(--font-weight-semibold);
+      margin-left: var(--space-xs);
+      transition: all var(--transition-base);
+    }
+
+    html[dir="rtl"] .auth-footer-link {
+      margin-left: 0;
+      margin-right: var(--space-xs);
+    }
+
+    .auth-footer-link:hover {
+      color: var(--color-gold-dark);
+      text-decoration: underline;
+    }
+
+    .toast {
+      position: fixed;
+      top: var(--space-lg);
+      right: var(--space-lg);
+      background: var(--color-white);
+      padding: var(--space-md) var(--space-lg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      z-index: var(--z-tooltip);
+      animation: slideInRight 0.3s ease;
+    }
+
+    html[dir="rtl"] .toast {
+      right: auto;
+      left: var(--space-lg);
+      animation: slideInLeft 0.3s ease;
+    }
+
+    .toast-success {
+      border-left: 4px solid var(--color-success);
+    }
+
+    html[dir="rtl"] .toast-success {
+      border-left: none;
+      border-right: 4px solid var(--color-success);
+    }
+
+    .toast-error {
+      border-left: 4px solid var(--color-error);
+    }
+
+    html[dir="rtl"] .toast-error {
+      border-left: none;
+      border-right: 4px solid var(--color-error);
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideInLeft {
+      from {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+  </style>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="logo-wrapper">
+          <i class="fas fa-car-wash logo-icon"></i>
+        </div>
+        <h1 class="auth-title" data-i18n="auth.login">Login</h1>
+        <p class="auth-subtitle" data-i18n="app.welcome">Welcome back!</p>
+      </div>
+
+      <form class="auth-form" id="loginForm">
+        <div class="input-group">
+          <input type="email" id="email" class="input" placeholder=" " required autocomplete="email">
+          <label class="input-label" for="email" data-i18n="auth.email">Email</label>
+        </div>
+
+        <div class="input-group">
+          <input type="password" id="password" class="input" placeholder=" " required autocomplete="current-password">
+          <label class="input-label" for="password" data-i18n="auth.password">Password</label>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="rememberMe" class="checkbox">
+          <label for="rememberMe" class="checkbox-label" data-i18n="auth.rememberMe">Remember me</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="loginBtn">
+          <span data-i18n="auth.loginButton">Sign In</span>
+        </button>
+
+        <div class="forgot-password">
+          <a href="#" class="forgot-password-link" data-i18n="auth.forgotPassword">Forgot Password?</a>
+        </div>
+      </form>
+
+      <div class="auth-divider">
+        <span class="divider-text" data-i18n="common.or">or</span>
+      </div>
+
+      <div class="auth-footer">
+        <span data-i18n="auth.noAccount">Don't have an account?</span>
+        <a href="register.html" class="auth-footer-link" data-i18n="auth.register">Register</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../utils/i18n.js"></script>
+  <script src="../utils/supabase.js"></script>
+
+  <script>
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Wait for i18n to be ready
+      await i18n.ready();
+
+      // Check if already logged in
+      const user = await getCurrentUser();
+      if (user) {
+        window.location.href = 'home.html';
+        return;
+      }
+    });
+
+    // Handle login form submission
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const loginBtn = document.getElementById('loginBtn');
+
+      // Disable button and show loading
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span data-i18n="common.loading">Loading...</span>';
+
+      try {
+        const result = await signIn(email, password);
+
+        if (result.success) {
+          showToast(i18n.t('auth.loginSuccess'), 'success');
+          setTimeout(() => {
+            window.location.href = 'home.html';
+          }, 1000);
+        } else {
+          showToast(result.error || i18n.t('auth.loginError'), 'error');
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = '<span data-i18n="auth.loginButton">Sign In</span>';
+          i18n.updatePageText();
+        }
+      } catch (error) {
+        showToast(i18n.t('auth.loginError'), 'error');
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = '<span data-i18n="auth.loginButton">Sign In</span>';
+        i18n.updatePageText();
+      }
+    });
+
+    // Show toast notification
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}" style="color: var(--color-${type});"></i>
+        <span>${message}</span>
+      `;
+
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
+</body>
+
+</html>

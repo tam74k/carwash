@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>Settings - Premium Car Wash</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../styles/variables.css">
+    <link rel="stylesheet" href="../styles/reset.css">
+    <link rel="stylesheet" href="../styles/components.css">
+
+    <style>
+        .page-header {
+            background: var(--color-white);
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--color-gray-200);
+            position: sticky;
+            top: 0;
+            z-index: var(--z-sticky);
+        }
+
+        .page-title {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+            text-align: center;
+        }
+
+        .page-content {
+            padding: var(--space-lg);
+            padding-bottom: calc(var(--bottom-nav-height) + var(--space-lg));
+        }
+
+        .settings-section {
+            margin-bottom: var(--space-xl);
+        }
+
+        .section-title {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-black);
+            margin-bottom: var(--space-md);
+        }
+
+        .settings-card {
+            background: var(--color-white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-md) 0;
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-black);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 52px;
+            height: 28px;
+            background: var(--color-gray-300);
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .toggle-switch.active {
+            background: var(--color-gold);
+        }
+
+        .toggle-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: var(--color-white);
+            border-radius: 50%;
+            transition: all var(--transition-base);
+        }
+
+        .toggle-switch.active .toggle-knob {
+            left: 26px;
+        }
+
+        .language-selector {
+            display: flex;
+            gap: var(--space-sm);
+        }
+
+        .lang-btn {
+            flex: 1;
+            padding: var(--space-sm);
+            border-radius: var(--radius-md);
+            background: var(--color-gray-100);
+            color: var(--color-gray-700);
+            font-weight: var(--font-weight-medium);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .lang-btn.active {
+            background: var(--color-gold);
+            color: var(--color-black);
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+            padding: var(--space-lg) 0;
+            margin-bottom: var(--space-md);
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-white);
+            font-size: 32px;
+            font-weight: var(--font-weight-bold);
+        }
+
+        .profile-info h3 {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--space-xs);
+        }
+
+        .profile-info p {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-600);
+        }
+
+        .menu-item {
+            background: var(--color-white);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .menu-item:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .menu-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--color-gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-gold);
+        }
+
+        .menu-label {
+            flex: 1;
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-medium);
+        }
+
+        .menu-arrow {
+            color: var(--color-gray-400);
+        }
+
+        .logout-btn {
+            width: 100%;
+            margin-top: var(--space-lg);
+            background: var(--color-error);
+            color: var(--color-white);
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+    </style>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title" data-i18n="settings.title">Settings</h1>
+    </div>
+
+    <!-- Content -->
+    <div class="page-content">
+        <!-- Profile Section -->
+        <div class="settings-section">
+            <div class="settings-card">
+                <div class="profile-section">
+                    <div class="profile-avatar" id="profileAvatar">U</div>
+                    <div class="profile-info">
+                        <h3 id="profileName">User</h3>
+                        <p id="profileEmail">user@email.com</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Language Section -->
+        <div class="settings-section">
+            <h2 class="section-title" data-i18n="settings.language">Language</h2>
+            <div class="settings-card">
+                <div class="language-selector">
+                    <button class="lang-btn active" id="enBtn" onclick="changeLanguage('en')">
+                        <i class="fas fa-globe"></i> English
+                    </button>
+                    <button class="lang-btn" id="arBtn" onclick="changeLanguage('ar')">
+                        <i class="fas fa-globe"></i> العربية
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Actions -->
+        <div class="settings-section">
+            <h2 class="section-title" data-i18n="settings.account">Account</h2>
+
+            <div class="menu-item" onclick="location.href='cars.html'">
+                <div class="menu-icon">
+                    <i class="fas fa-car"></i>
+                </div>
+                <div class="menu-label" data-i18n="home.myCars">My Cars</div>
+                <i class="fas fa-chevron-right menu-arrow"></i>
+            </div>
+
+            <div class="menu-item" onclick="location.href='addresses.html'">
+                <div class="menu-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="menu-label" data-i18n="addresses.title">My Addresses</div>
+                <i class="fas fa-chevron-right menu-arrow"></i>
+            </div>
+
+            <div class="menu-item" onclick="location.href='orders.html'">
+                <div class="menu-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="menu-label" data-i18n="home.myOrders">My Orders</div>
+                <i class="fas fa-chevron-right menu-arrow"></i>
+            </div>
+        </div>
+
+        <!-- Logout -->
+        <button class="btn logout-btn" onclick="handleLogout()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span data-i18n="auth.logout">Logout</span>
+        </button>
+
+        <!-- Version -->
+        <div
+            style="text-align: center; margin-top: var(--space-xl); color: var(--color-gray-500); font-size: var(--font-size-sm);">
+            <span data-i18n="settings.version">Version</span> 1.0.0
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-item" onclick="location.href='home.html'">
+            <i class="fas fa-home bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.home">Home</span>
+        </div>
+        <div class="bottom-nav-item" onclick="location.href='booking.html'">
+            <i class="fas fa-calendar-plus bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.book">Book</span>
+        </div>
+        <div class="bottom-nav-item" onclick="location.href='orders.html'">
+            <i class="fas fa-list bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.orders">Orders</span>
+        </div>
+        <div class="bottom-nav-item active" onclick="location.href='settings.html'">
+            <i class="fas fa-user bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.profile">Profile</span>
+        </div>
+    </nav>
+
+    <!-- Loader -->
+    <div id="loader" class="loader-overlay hidden">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../utils/i18n.js"></script>
+    <script src="../utils/supabase.js"></script>
+
+    <script>
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            showLoader();
+
+            // Wait for i18n to be ready
+            await i18n.ready();
+
+            currentUser = await getCurrentUser();
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+            loadProfile();
+            updateLanguageButtons();
+            hideLoader();
+        });
+
+        function loadProfile() {
+            const name = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+            const email = currentUser.email;
+            const initials = name.charAt(0).toUpperCase();
+
+            document.getElementById('profileName').textContent = name;
+            document.getElementById('profileEmail').textContent = email;
+            document.getElementById('profileAvatar').textContent = initials;
+        }
+
+        function updateLanguageButtons() {
+            const currentLang = i18n.getCurrentLanguage();
+            document.getElementById('enBtn').classList.toggle('active', currentLang === 'en');
+            document.getElementById('arBtn').classList.toggle('active', currentLang === 'ar');
+        }
+
+        async function changeLanguage(lang) {
+            showLoader();
+            await i18n.setLanguage(lang);
+            updateLanguageButtons();
+            hideLoader();
+        }
+
+        async function handleLogout() {
+            if (!confirm(i18n.t('auth.logout') + '?')) return;
+
+            showLoader();
+
+            try {
+                const result = await signOut();
+                if (result.success) {
+                    window.location.href = 'login.html';
+                } else {
+                    alert('Logout failed');
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('An error occurred');
+            }
+
+            hideLoader();
+        }
+
+        function showLoader() {
+            document.getElementById('loader').classList.remove('hidden');
+        }
+
+        function hideLoader() {
+            document.getElementById('loader').classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>

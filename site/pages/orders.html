@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>My Orders - Premium Car Wash</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!--  Styles -->
+    <link rel="stylesheet" href="../styles/variables.css">
+    <link rel="stylesheet" href="../styles/reset.css">
+    <link rel="stylesheet" href="../styles/components.css">
+
+    <style>
+        .page-header {
+            background: var(--color-white);
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--color-gray-200);
+            position: sticky;
+            top: 0;
+            z-index: var(--z-sticky);
+        }
+
+        .page-title {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+            text-align: center;
+        }
+
+        .page-content {
+            padding-bottom: calc(var(--bottom-nav-height) + var(--space-lg));
+        }
+
+        .tabs-container {
+            background: var(--color-white);
+            padding: 0 var(--space-lg);
+            position: sticky;
+            top: 73px;
+            z-index: var(--z-sticky);
+        }
+
+        .orders-list {
+            padding: var(--space-lg);
+        }
+
+        .order-card {
+            background: var(--color-white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-md);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--space-md);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+
+        .order-id {
+            font-size: var(--font-size-xs);
+            color: var(--color-gray-500);
+            margin-bottom: var(--space-xs);
+        }
+
+        .order-car {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-black);
+        }
+
+        .order-info {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+        }
+
+        .order-info-row {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-700);
+        }
+
+        .info-icon {
+            width: 20px;
+            color: var(--color-gold);
+        }
+
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title" data-i18n="orders.title">My Orders</h1>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-container">
+        <div class="tabs">
+            <button class="tab active" data-tab="open" onclick="switchTab('open')"
+                data-i18n="orders.tabs.open">Open</button>
+            <button class="tab" data-tab="completed" onclick="switchTab('completed')"
+                data-i18n="orders.tabs.completed">Completed</button>
+            <button class="tab" data-tab="cancelled" onclick="switchTab('cancelled')"
+                data-i18n="orders.tabs.cancelled">Cancelled</button>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="page-content">
+        <!-- Open Orders -->
+        <div id="open" class="tab-content active orders-list"></div>
+
+        <!-- Completed Orders -->
+        <div id="completed" class="tab-content orders-list"></div>
+
+        <!-- Cancelled Orders -->
+        <div id="cancelled" class="tab-content orders-list"></div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-item" onclick="location.href='home.html'">
+            <i class="fas fa-home bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.home">Home</span>
+        </div>
+        <div class="bottom-nav-item" onclick="location.href='booking.html'">
+            <i class="fas fa-calendar-plus bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.book">Book</span>
+        </div>
+        <div class="bottom-nav-item active" onclick="location.href='orders.html'">
+            <i class="fas fa-list bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.orders">Orders</span>
+        </div>
+        <div class="bottom-nav-item" onclick="location.href='settings.html'">
+            <i class="fas fa-user bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.profile">Profile</span>
+        </div>
+    </nav>
+
+    <!-- Loader -->
+    <div id="loader" class="loader-overlay hidden">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../utils/i18n.js"></script>
+    <script src="../utils/supabase.js"></script>
+
+    <script>
+        let currentUser = null;
+        let allBookings = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            showLoader();
+
+            // Wait for i18n to be ready
+            await i18n.ready();
+
+            currentUser = await getCurrentUser();
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+            await loadBookings();
+            hideLoader();
+        });
+
+        async function loadBookings() {
+            try {
+                allBookings = await getUserBookings(currentUser.id);
+                renderOrders('open');
+                renderOrders('completed');
+                renderOrders('cancelled');
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+            }
+        }
+
+        function renderOrders(tabType) {
+            const container = document.getElementById(tabType);
+            let bookings = [];
+
+            if (tabType === 'open') {
+                bookings = allBookings.filter(b => b.status === 'pending' || b.status === 'confirmed');
+            } else if (tabType === 'completed') {
+                bookings = allBookings.filter(b => b.status === 'completed');
+            } else if (tabType === 'cancelled') {
+                bookings = allBookings.filter(b => b.status === 'cancelled');
+            }
+
+            if (bookings.length === 0) {
+                container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon"><i class="fas fa-calendar-times"></i></div>
+            <div class="empty-state-title" data-i18n="orders.noOrders">No orders found</div>
+          </div>
+        `;
+                i18n.updatePageText();
+                return;
+            }
+
+            container.innerHTML = bookings.map(booking => `
+        <div class="order-card">
+          <div class="order-header">
+            <div>
+              <div class="order-id">#${booking.id.slice(0, 8)}</div>
+              <div class="order-car">${booking.cars?.brand_model || 'Car'}</div>
+            </div>
+            <span class="badge badge-${getStatusBadgeType(booking.status)}">
+              ${i18n.t('orders.status.' + booking.status)}
+            </span>
+          </div>
+
+          <div class="order-info">
+            <div class="order-info-row">
+              <i class="fas fa-calendar info-icon"></i>
+              <span>${new Date(booking.booking_date).toLocaleDateString()}</span>
+            </div>
+            <div class="order-info-row">
+              <i class="fas fa-clock info-icon"></i>
+              <span>${booking.time_slot}</span>
+            </div>
+            <div class="order-info-row">
+              <i class="fas fa-map-marker-alt info-icon"></i>
+              <span>${booking.location}</span>
+            </div>
+            ${booking.notes ? `
+              <div class="order-info-row">
+                <i class="fas fa-sticky-note info-icon"></i>
+                <span>${booking.notes}</span>
+              </div>
+            ` : ''}
+          </div>
+
+          ${booking.status === 'pending' || booking.status === 'confirmed' ? `
+            <div class="order-footer">
+              <button class="btn btn-outline btn-sm" onclick="cancelOrder('${booking.id}')">
+                <i class="fas fa-times"></i>
+                <span data-i18n="orders.cancelBooking">Cancel</span>
+              </button>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+
+            i18n.updatePageText();
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        async function cancelOrder(bookingId) {
+            if (!confirm(i18n.t('orders.cancelBooking') + '?')) return;
+
+            showLoader();
+
+            try {
+                const result = await cancelBooking(bookingId);
+                if (result.success) {
+                    await loadBookings();
+                } else {
+                    alert(result.error);
+                }
+            } catch (error) {
+                console.error('Error cancelling booking:', error);
+                alert('An error occurred');
+            }
+
+            hideLoader();
+        }
+
+        function getStatusBadgeType(status) {
+            const statusMap = {
+                'pending': 'warning',
+                'confirmed': 'gold',
+                'completed': 'success',
+                'cancelled': 'error'
+            };
+            return statusMap[status] || 'info';
+        }
+
+        function showLoader() {
+            document.getElementById('loader').classList.remove('hidden');
+        }
+
+        function hideLoader() {
+            document.getElementById('loader').classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>

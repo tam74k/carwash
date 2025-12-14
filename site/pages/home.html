@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>Home - Premium Car Wash</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../styles/variables.css">
+    <link rel="stylesheet" href="../styles/reset.css">
+    <link rel="stylesheet" href="../styles/components.css">
+
+    <style>
+        .page-content {
+            padding-bottom: calc(var(--bottom-nav-height) + var(--space-lg));
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--color-black) 0%, var(--color-gray-900) 100%);
+            color: var(--color-white);
+            padding: var(--space-xl) var(--space-lg);
+            border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+            margin-bottom: var(--space-xl);
+            position: relative;
+        }
+
+        .lang-toggle-btn {
+            position: absolute;
+            top: var(--space-md);
+            right: var(--space-md);
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            color: var(--color-black);
+            border: none;
+            border-radius: var(--radius-full);
+            padding: var(--space-sm) var(--space-md);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            box-shadow: var(--shadow-gold);
+            transition: all var(--transition-base);
+            z-index: 10;
+        }
+
+        html[dir="rtl"] .lang-toggle-btn {
+            right: auto;
+            left: var(--space-md);
+        }
+
+        .lang-toggle-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .lang-toggle-btn:active {
+            transform: scale(0.95);
+        }
+
+        .brand-logo {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            margin-bottom: var(--space-md);
+        }
+
+        .brand-name {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-gold);
+            margin-bottom: var(--space-sm);
+        }
+
+        .welcome-message {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--space-xs);
+        }
+
+        .welcome-subtitle {
+            font-size: var(--font-size-base);
+            color: var(--color-gray-300);
+        }
+
+        .quick-actions {
+            padding: 0 var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+
+        .section-title {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--space-md);
+            color: var(--color-black);
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+        }
+
+        .action-card {
+            background: var(--color-white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-lg);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-md);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            min-height: 140px;
+        }
+
+        .action-card:active {
+            transform: scale(0.98);
+        }
+
+        .action-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .action-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--color-white);
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            box-shadow: var(--shadow-gold);
+        }
+
+        .action-title {
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-black);
+        }
+
+        .stats-section {
+            padding: 0 var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+        }
+
+        .stat-card {
+            background: var(--color-white);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-gold);
+            margin-bottom: var(--space-xs);
+        }
+
+        .stat-label {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-600);
+        }
+
+        .recent-orders {
+            padding: 0 var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-md);
+        }
+
+        .view-all-link {
+            font-size: var(--font-size-sm);
+            color: var(--color-gold);
+            font-weight: var(--font-weight-semibold);
+            transition: all var(--transition-base);
+        }
+
+        .view-all-link:hover {
+            color: var(--color-gold-dark);
+        }
+
+        .order-card {
+            background: var(--color-white);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            margin-bottom: var(--space-md);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .order-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--color-gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-gold);
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .order-details {
+            flex: 1;
+        }
+
+        .order-car {
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-black);
+            margin-bottom: var(--space-xs);
+        }
+
+        .order-date {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-600);
+        }
+
+        .order-status {
+            flex-shrink: 0;
+        }
+    </style>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <div class="page-content">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <button class="lang-toggle-btn" onclick="toggleLanguage()" id="langToggleBtn">
+                <i class="fas fa-language"></i>
+                <span id="langText">عربي</span>
+            </button>
+            <div id="brandInfo">
+                <div class="brand-name" data-i18n="app.name">Premium Car Wash</div>
+            </div>
+            <h1 class="welcome-message">
+                <span data-i18n="home.welcomeBack">Welcome back</span>, <span id="userName">User</span>!
+            </h1>
+            <p class="welcome-subtitle">Ready to book your next wash?</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h2 class="section-title" data-i18n="home.quickActions">Quick Actions</h2>
+            <div class="actions-grid">
+                <div class="action-card" onclick="location.href='booking.html'">
+                    <div class="action-icon">
+                        <i class="fas fa-calendar-plus"></i>
+                    </div>
+                    <div class="action-title" data-i18n="home.newBooking">New Booking</div>
+                </div>
+
+                <div class="action-card" onclick="location.href='orders.html'">
+                    <div class="action-icon">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <div class="action-title" data-i18n="home.myOrders">My Orders</div>
+                </div>
+
+                <div class="action-card" onclick="location.href='cars.html'">
+                    <div class="action-icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <div class="action-title" data-i18n="home.myCars">My Cars</div>
+                </div>
+
+                <div class="action-card" onclick="location.href='addresses.html'">
+                    <div class="action-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="action-title" data-i18n="addresses.title">My Addresses</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <h2 class="section-title">Your Stats</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalBookings">0</div>
+                    <div class="stat-label" data-i18n="home.totalBookings">Total Bookings</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-number" id="upcomingCount">0</div>
+                    <div class="stat-label" data-i18n="home.upcomingAppointments">Upcoming</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="recent-orders">
+            <div class="section-header">
+                <h2 class="section-title" data-i18n="home.recentOrders">Recent Orders</h2>
+                <a href="orders.html" class="view-all-link" data-i18n="home.viewAll">View All</a>
+            </div>
+            <div id="recentOrdersList">
+                <!-- Orders will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-item active" onclick="location.href='home.html'">
+            <i class="fas fa-home bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.home">Home</span>
+        </div>
+        <div class="bottom-nav-item" onclick="location.href='booking.html'">
+            <i class="fas fa-calendar-plus bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.book">Book</span>
+        </div>
+        <div class="bottom-nav-item" onclick="location.href='orders.html'">
+            <i class="fas fa-list bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.orders">Orders</span>
+        </div>
+        <div class="bottom-nav-item" onclick="location.href='settings.html'">
+            <i class="fas fa-user bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.profile">Profile</span>
+        </div>
+    </nav>
+
+    <!-- Loader -->
+    <div id="loader" class="loader-overlay hidden">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../utils/i18n.js"></script>
+    <script src="../utils/supabase.js"></script>
+
+    <script>
+        let currentUser = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async () => {
+            showLoader();
+
+            // Wait for i18n to be ready
+            await i18n.ready();
+
+            // Check authentication
+            currentUser = await getCurrentUser();
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Load data
+            await Promise.all([
+                loadBusinessInfo(),
+                loadUserStats(),
+                loadRecentOrders()
+            ]);
+
+            // Update user name
+            const userName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+            document.getElementById('userName').textContent = userName;
+
+            // Update language button text
+            updateLanguageButton();
+
+            hideLoader();
+        });
+
+        // Load business info
+        async function loadBusinessInfo() {
+            try {
+                const business = await getBusinessInfo();
+                if (business) {
+                    const brandInfo = document.getElementById('brandInfo');
+                    if (business.logo_url) {
+                        brandInfo.innerHTML = `
+              <img src="${business.logo_url}" alt="${business.name}" class="brand-logo">
+              <div class="brand-name">${business.name}</div>
+            `;
+                    } else {
+                        brandInfo.innerHTML = `<div class="brand-name">${business.name}</div>`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading business info:', error);
+            }
+        }
+
+        // Load user stats
+        async function loadUserStats() {
+            try {
+                const bookings = await getUserBookings(currentUser.id);
+                const totalBookings = bookings.length;
+                const upcomingCount = bookings.filter(b =>
+                    b.status === 'pending' || b.status === 'confirmed'
+                ).length;
+
+                document.getElementById('totalBookings').textContent = totalBookings;
+                document.getElementById('upcomingCount').textContent = upcomingCount;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Load recent orders
+        async function loadRecentOrders() {
+            try {
+                const bookings = await getUserBookings(currentUser.id);
+                const recentBookings = bookings.slice(0, 3);
+
+                const ordersList = document.getElementById('recentOrdersList');
+
+                if (recentBookings.length === 0) {
+                    ordersList.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon"><i class="fas fa-calendar-times"></i></div>
+              <div class="empty-state-title" data-i18n="home.noOrders">No orders yet</div>
+            </div>
+          `;
+                    i18n.updatePageText();
+                    return;
+                }
+
+                ordersList.innerHTML = recentBookings.map(booking => `
+          <div class="order-card">
+            <div class="order-icon">
+              <i class="fas fa-car"></i>
+            </div>
+            <div class="order-details">
+              <div class="order-car">${booking.cars?.brand_model || 'Car'}</div>
+              <div class="order-date">
+                ${new Date(booking.booking_date).toLocaleDateString()} • ${booking.time_slot}
+              </div>
+            </div>
+            <div class="order-status">
+              <span class="badge badge-${getStatusBadgeType(booking.status)}">
+                ${i18n.t('orders.status.' + booking.status)}
+              </span>
+            </div>
+          </div>
+        `).join('');
+            } catch (error) {
+                console.error('Error loading recent orders:', error);
+            }
+        }
+
+        function getStatusBadgeType(status) {
+            const statusMap = {
+                'pending': 'warning',
+                'confirmed': 'gold',
+                'completed': 'success',
+                'cancelled': 'error'
+            };
+            return statusMap[status] || 'info';
+        }
+
+        async function toggleLanguage() {
+            const currentLang = i18n.getCurrentLanguage();
+            const newLang = currentLang === 'en' ? 'ar' : 'en';
+
+            showLoader();
+            await i18n.setLanguage(newLang);
+            updateLanguageButton();
+            hideLoader();
+        }
+
+        function updateLanguageButton() {
+            const currentLang = i18n.getCurrentLanguage();
+            const langText = document.getElementById('langText');
+
+            if (currentLang === 'en') {
+                langText.textContent = 'عربي';  // Show "Arabic" when in English
+            } else {
+                langText.textContent = 'English';  // Show "English" when in Arabic
+            }
+        }
+
+        function showLoader() {
+            document.getElementById('loader').classList.remove('hidden');
+        }
+
+        function hideLoader() {
+            document.getElementById('loader').classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>New Booking - Premium Car Wash</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../styles/variables.css">
+    <link rel="stylesheet" href="../styles/reset.css">
+    <link rel="stylesheet" href="../styles/components.css">
+
+    <style>
+        .page-header {
+            background: var(--color-white);
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--color-gray-200);
+            position: sticky;
+            top: 0;
+            z-index: var(--z-sticky);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-gray-100);
+            color: var(--color-gray-700);
+            cursor: pointer;
+        }
+
+        .page-title {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+            flex: 1;
+            text-align: center;
+        }
+
+        .page-content {
+            padding: var(--space-lg);
+            padding-bottom: calc(var(--bottom-nav-height) + var(--space-lg));
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: var(--color-gray-200);
+            border-radius: var(--radius-full);
+            margin-bottom: var(--space-xl);
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--color-gold);
+            border-radius: var(--radius-full);
+            transition: width var(--transition-base);
+        }
+
+        .step-indicator {
+            text-align: center;
+            margin-bottom: var(--space-lg);
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-600);
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .selection-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-md);
+            margin-bottom: var(--space-xl);
+        }
+
+        .selection-card {
+            background: var(--color-white);
+            border: 2px solid var(--color-gray-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .selection-card:hover {
+            border-color: var(--color-gold);
+        }
+
+        .selection-card.selected {
+            border-color: var(--color-gold);
+            background: var(--color-gold-light);
+        }
+
+        .selection-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--color-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-white);
+            font-size: 20px;
+        }
+
+        .selection-info {
+            flex: 1;
+        }
+
+        .selection-title {
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--space-xs);
+        }
+
+        .selection-subtitle {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-600);
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-sm);
+            margin-bottom: var(--space-xl);
+        }
+
+        .time-slot {
+            padding: var(--space-md);
+            text-align: center;
+            border-radius: var(--radius-md);
+            background: var(--color-white);
+            border: 2px solid var(--color-gray-200);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+        }
+
+        .time-slot:hover {
+            border-color: var(--color-gold);
+        }
+
+        .time-slot.selected {
+            border-color: var(--color-gold);
+            background: var(--color-gold);
+            color: var(--color-black);
+        }
+
+        .time-slot.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: var(--space-md);
+            position: fixed;
+            bottom: calc(var(--bottom-nav-height) + var(--space-lg));
+            left: var(--space-lg);
+            right: var(--space-lg);
+            background: var(--color-gray-50);
+            padding: var(--space-md);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .date-input {
+            width: 100%;
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            border: 2px solid var(--color-gray-300);
+            font-size: var(--font-size-base);
+            font-family: inherit;
+            background: var(--color-white);
+            margin-bottom: var(--space-xl);
+        }
+
+        .date-input:focus {
+            border-color: var(--color-gold);
+            outline: none;
+        }
+    </style>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="page-title" data-i18n="booking.title">New Booking</h1>
+            <div style="width: 40px;"></div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="page-content">
+        <!-- Progress -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 20%;"></div>
+        </div>
+
+        <div class="step-indicator">
+            <span data-i18n="booking.step">Step</span> <span id="currentStep">1</span> <span
+                data-i18n="booking.of">of</span> 5
+        </div>
+
+        <!-- Step 1: Select Car -->
+        <div id="step1" class="step active">
+            <h2 class="section-title" data-i18n="booking.selectCar">Select Your Car</h2>
+            <div class="selection-grid" id="carsList"></div>
+        </div>
+
+        <!-- Step 2: Select Service -->
+        <div id="step2" class="step">
+            <h2 class="section-title" data-i18n="booking.selectService">Select Service</h2>
+            <div class="selection-grid">
+                <div class="selection-card" onclick="selectService('basic')">
+                    <div class="selection-icon"><i class="fas fa-spray-can"></i></div>
+                    <div class="selection-info">
+                        <div class="selection-title" data-i18n="booking.services.basic">Basic Wash</div>
+                        <div class="selection-subtitle">Exterior wash & dry</div>
+                    </div>
+                </div>
+                <div class="selection-card" onclick="selectService('premium')">
+                    <div class="selection-icon"><i class="fas fa-star"></i></div>
+                    <div class="selection-info">
+                        <div class="selection-title" data-i18n="booking.services.premium">Premium Wash</div>
+                        <div class="selection-subtitle">Exterior + Interior basic</div>
+                    </div>
+                </div>
+                <div class="selection-card" onclick="selectService('deluxe')">
+                    <div class="selection-icon"><i class="fas fa-gem"></i></div>
+                    <div class="selection-info">
+                        <div class="selection-title" data-i18n="booking.services.deluxe">Deluxe Wash</div>
+                        <div class="selection-subtitle">Complete detail service</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Select Date -->
+        <div id="step3" class="step">
+            <h2 class="section-title" data-i18n="booking.selectDate">Select Date</h2>
+            <input type="date" class="date-input" id="dateInput" onchange="selectDate(this.value)">
+        </div>
+
+        <!-- Step 4: Select Time -->
+        <div id="step4" class="step">
+            <h2 class="section-title" data-i18n="booking.selectTime">Select Time</h2>
+            <div class="time-slots" id="timeSlotsList"></div>
+        </div>
+
+        <!-- Step 5: Location & Notes -->
+        <div id="step5" class="step">
+            <h2 class="section-title" data-i18n="booking.selectLocation">Select Location</h2>
+            <div class="selection-grid" id="locationsList"></div>
+
+            <h2 class="section-title" style="margin-top: var(--space-xl);" data-i18n="booking.addNotes">Add Notes
+                (Optional)</h2>
+            <div class="input-group">
+                <textarea id="notes" class="input" style="min-height: 100px; resize: vertical;"
+                    data-i18n-placeholder="booking.notesPlaceholder" placeholder="Any special instructions?"></textarea>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+            <button class="btn btn-ghost" id="prevBtn" onclick="previousStep()" style="display: none;">
+                <i class="fas fa-arrow-left"></i>
+                <span data-i18n="booking.previous">Previous</span>
+            </button>
+            <button class="btn btn-primary" id="nextBtn" onclick="nextStep()" style="flex: 1;">
+                <span data-i18n="booking.next">Next</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-item" onclick="location.href='home.html'">
+            <i class="fas fa-home bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.home">Home</span>
+        </div>
+        <div class="bottom-nav-item active" onclick="location.href='booking.html'">
+            <i class="fas fa-calendar-plus bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.book">Book</span>
+        </div>
+        <div class="bottom-nav-item" onclick="location.href='orders.html'">
+            <i class="fas fa-list bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.orders">Orders</span>
+        </div>
+        <div class="bottom-nav-item" onclick="location.href='settings.html'">
+            <i class="fas fa-user bottom-nav-icon"></i>
+            <span class="bottom-nav-label" data-i18n="nav.profile">Profile</span>
+        </div>
+    </nav>
+
+    <!-- Loader -->
+    <div id="loader" class="loader-overlay hidden">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../utils/i18n.js"></script>
+    <script src="../utils/supabase.js"></script>
+
+    <script>
+        let currentUser = null;
+        let currentStepNum = 1;
+        const totalSteps = 5;
+
+        const bookingData = {
+            carId: null,
+            service: null,
+            date: null,
+            timeSlot: null,
+            location: null,
+            notes: ''
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            showLoader();
+
+            // Wait for i18n to be ready
+            await i18n.ready();
+
+            currentUser = await getCurrentUser();
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+            await loadCars();
+            setMinDate();
+            hideLoader();
+        });
+
+        async function loadCars() {
+            const cars = await getUserCars(currentUser.id);
+            const carsList = document.getElementById('carsList');
+
+            if (cars.length === 0) {
+                carsList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-title" data-i18n="booking.noCars">No cars added.</div>
+            <button class="btn btn-primary" onclick="location.href='cars.html'">
+              <i class="fas fa-plus"></i>
+              <span data-i18n="booking.addCar">Add Car</span>
+            </button>
+          </div>
+        `;
+                i18n.updatePageText();
+                return;
+            }
+
+            carsList.innerHTML = cars.map(car => `
+        <div class="selection-card" onclick="selectCar('${car.id}')">
+          <div class="selection-icon"><i class="fas fa-car"></i></div>
+          <div class="selection-info">
+            <div class="selection-title">${car.brand_model}</div>
+            <div class="selection-subtitle">${car.license_plate}</div>
+          </div>
+        </div>
+      `).join('');
+        }
+
+        async function loadLocations() {
+            const addresses = await getUserAddresses(currentUser.id);
+            const locationsList = document.getElementById('locationsList');
+
+            if (addresses.length === 0) {
+                locationsList.innerHTML = `
+          <div class="selection-card" onclick="selectLocation('Home')">
+            <div class="selection-icon"><i class="fas fa-home"></i></div>
+            <div class="selection-info">
+              <div class="selection-title">Home</div>
+            </div>
+          </div>
+        `;
+                return;
+            }
+
+            locationsList.innerHTML = addresses.map(address => `
+        <div class="selection-card" onclick="selectLocation('${address.label}: ${address.street}, ${address.city}')">
+          <div class="selection-icon"><i class="fas fa-map-marker-alt"></i></div>
+          <div class="selection-info">
+            <div class="selection-title">${address.label}</div>
+            <div class="selection-subtitle">${address.street}, ${address.city}</div>
+          </div>
+        </div>
+      `).join('');
+        }
+
+        async function loadTimeSlots() {
+            const slots = await getAvailableSlots(bookingData.date);
+            const timeSlotsList = document.getElementById('timeSlotsList');
+
+            if (slots.length === 0) {
+                timeSlotsList.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: var(--space-xl); color: var(--color-gray-600);">
+                        <i class="fas fa-calendar-times" style="font-size: 48px; margin-bottom: var(--space-md); color: var(--color-gray-400);"></i>
+                        <div style="font-size: var(--font-size-base); margin-bottom: var(--space-sm);" data-i18n="booking.noSlotsAvailable">
+                            جميع الأوقات محجوزة في هذا اليوم
+                        </div>
+                        <div style="font-size: var(--font-size-sm);" data-i18n="booking.tryAnotherDate">
+                            يرجى اختيار تاريخ آخر
+                        </div>
+                    </div>
+                `;
+                i18n.updatePageText();
+                return;
+            }
+
+            timeSlotsList.innerHTML = slots.map(slot => `
+                <div class="time-slot" onclick="selectTimeSlot('${slot}')">${slot}</div>
+            `).join('');
+        }
+
+        function setMinDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateInput').setAttribute('min', today);
+            document.getElementById('dateInput').value = today;
+        }
+
+        function selectCar(carId) {
+            bookingData.carId = carId;
+            document.querySelectorAll('#step1 .selection-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.selection-card').classList.add('selected');
+        }
+
+        function selectService(service) {
+            bookingData.service = service;
+            document.querySelectorAll('#step2 .selection-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.selection-card').classList.add('selected');
+        }
+
+        function selectDate(date) {
+            bookingData.date = date;
+            console.log('📆 Selected date:', date);
+            loadTimeSlots(); // Auto-reload slots when date changes
+        }
+
+        function selectTimeSlot(slot) {
+            bookingData.timeSlot = slot;
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+        }
+
+        function selectLocation(location) {
+            bookingData.location = location;
+            document.querySelectorAll('#step5 .selection-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.selection-card').classList.add('selected');
+        }
+
+        function nextStep() {
+            // Validation
+            if (currentStepNum === 1 && !bookingData.carId) {
+                alert(i18n.t('booking.selectCar'));
+                return;
+            }
+            if (currentStepNum === 2 && !bookingData.service) {
+                alert(i18n.t('booking.selectService'));
+                return;
+            }
+            if (currentStepNum === 3 && !bookingData.date) {
+                alert(i18n.t('booking.selectDate'));
+                return;
+            }
+            if (currentStepNum === 4 && !bookingData.timeSlot) {
+                alert(i18n.t('booking.selectTime'));
+                return;
+            }
+
+            if (currentStepNum < totalSteps) {
+                currentStepNum++;
+                updateStep();
+
+                // Load data for specific steps
+                if (currentStepNum === 4) {
+                    loadTimeSlots();
+                }
+                if (currentStepNum === 5) {
+                    loadLocations();
+                }
+            } else {
+                submitBooking();
+            }
+        }
+
+        function previousStep() {
+            if (currentStepNum > 1) {
+                currentStepNum--;
+                updateStep();
+            }
+        }
+
+        function updateStep() {
+            // Hide all steps
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+
+            // Show current step
+            document.getElementById('step' + currentStepNum).classList.add('active');
+
+            // Update progress
+            const progress = (currentStepNum / totalSteps) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('currentStep').textContent = currentStepNum;
+
+            // Update buttons
+            document.getElementById('prevBtn').style.display = currentStepNum > 1 ? 'flex' : 'none';
+
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentStepNum === totalSteps) {
+                nextBtn.innerHTML = '<span data-i18n="booking.confirm">Confirm Booking</span> <i class="fas fa-check"></i>';
+                i18n.updatePageText();
+            } else {
+                nextBtn.innerHTML = '<span data-i18n="booking.next">Next</span> <i class="fas fa-arrow-right"></i>';
+                i18n.updatePageText();
+            }
+        }
+
+        async function submitBooking() {
+            if (!bookingData.location) {
+                alert(i18n.t('booking.selectLocation'));
+                return;
+            }
+
+            bookingData.notes = document.getElementById('notes').value;
+
+            showLoader();
+
+            try {
+                const result = await createBooking(
+                    currentUser.id,
+                    bookingData.carId,
+                    bookingData.date,
+                    bookingData.timeSlot,
+                    bookingData.location,
+                    bookingData.notes
+                );
+
+                if (result.success) {
+                    alert(i18n.t('booking.bookingSuccess'));
+                    location.href = 'orders.html';
+                } else {
+                    alert(result.error || i18n.t('booking.bookingError'));
+                }
+            } catch (error) {
+                console.error('Booking error:', error);
+                alert(i18n.t('booking.bookingError'));
+            }
+
+            hideLoader();
+        }
+
+        function goBack() {
+            if (currentStepNum > 1) {
+                previousStep();
+            } else {
+                location.href = 'home.html';
+            }
+        }
+
+        function showLoader() {
+            document.getElementById('loader').classList.remove('hidden');
+        }
+
+        function hideLoader() {
+            document.getElementById('loader').classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>

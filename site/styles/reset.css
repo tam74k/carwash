@@ -1,0 +1,125 @@
+/* =========================================================
+   Modern CSS Reset + Base Styles
+   Mobile-First Responsive Foundation
+   ========================================================= */
+
+/* Box sizing reset */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Remove default browser styles */
+html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    min-height: 100vh;
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-normal);
+    color: var(--color-black);
+    background-color: var(--color-gray-50);
+    overflow-x: hidden;
+}
+
+/* Typography reset */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    margin: 0;
+}
+
+p {
+    margin: 0;
+}
+
+/* List reset */
+ul,
+ol {
+    list-style: none;
+}
+
+/* Link reset */
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Button reset */
+button {
+    font-family: inherit;
+    font-size: inherit;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+/* Input reset */
+input,
+textarea,
+select {
+    font-family: inherit;
+    font-size: inherit;
+    border: none;
+    background: none;
+    outline: none;
+}
+
+/* Image reset */
+img,
+svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+/* Remove spinner from number inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+}
+
+/* Smooth scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Improve text rendering */
+body {
+    text-rendering: optimizeLegibility;
+}
+
+/* Selection styling */
+::selection {
+    background-color: var(--color-gold);
+    color: var(--color-black);
+}
+
+/* Disable tap highlight on mobile */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
